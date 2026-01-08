@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JUICECON - Dewpoint Severity Index</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-stripe"></div>
+            <div class="classification">ATMOSPHERIC MOISTURE ASSESSMENT SYSTEM</div>
+        </header>
+
+        <main class="main">
+            <div id="loading" class="loading">
+                <div class="loading-text">ACQUIRING TARGET COORDINATES...</div>
+                <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+            </div>
+
+            <div id="error" class="error hidden">
+                <div class="error-icon">!</div>
+                <div class="error-title">SYSTEM ERROR</div>
+                <div id="error-message" class="error-message"></div>
+                <button id="retry-btn" class="btn">RETRY</button>
+            </div>
+
+            <div id="display" class="display hidden">
+                <div class="level-container">
+                    <div class="level-label">CURRENT THREAT LEVEL</div>
+                    <div id="level-number" class="level-number">3</div>
+                    <div class="level-prefix">JUICECON</div>
+                </div>
+
+                <div id="descriptor" class="descriptor">UNBEARABLE</div>
+                <div id="description" class="description">"The air has weight. You are breathing soup."</div>
+
+                <div class="data-panel">
+                    <div class="data-row">
+                        <span class="data-label">DEWPOINT</span>
+                        <span id="dewpoint" class="data-value">71.2°F</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">LOCATION</span>
+                        <span id="location" class="data-value">Fort Wayne, IN</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">STATION</span>
+                        <span id="station" class="data-value">KFWA</span>
+                    </div>
+                    <div class="data-row">
+                        <span class="data-label">UPDATED</span>
+                        <span id="timestamp" class="data-value">--:-- --</span>
+                    </div>
+                </div>
+
+                <div class="actions">
+                    <button id="refresh-btn" class="btn">REFRESH DATA</button>
+                    <button id="location-btn" class="btn btn-secondary">CHANGE LOCATION</button>
+                </div>
+            </div>
+
+            <div id="location-modal" class="modal hidden">
+                <div class="modal-content">
+                    <div class="modal-header">MANUAL LOCATION ENTRY</div>
+                    <div class="modal-body">
+                        <label for="zip-input" class="input-label">US ZIP CODE</label>
+                        <input type="text" id="zip-input" class="input" placeholder="45678" maxlength="5" pattern="[0-9]{5}">
+                        <div class="modal-hint">Enter 5-digit ZIP code for US locations</div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="modal-cancel" class="btn btn-secondary">CANCEL</button>
+                        <button id="modal-submit" class="btn">SUBMIT</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <div class="footer-text">JUICECON SYSTEM v1.0 // PROPRIETARY DEWPOINT ASSESSMENT PROTOCOL</div>
+            <div class="footer-credit">Juicecon System designed by Joe Tritschler</div>
+            <div class="footer-credit">App developed by Dan Branstrator</div>
+        </footer>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>
