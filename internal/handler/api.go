@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"math"
+	"time"
+
 	"juicecon-golang/internal/geo"
 	"juicecon-golang/internal/index"
 	"juicecon-golang/internal/weather"
@@ -57,6 +60,17 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Test mode: override dewpoint with ?dewpoint=XX to skip NWS API
+	if dpStr := r.URL.Query().Get("dewpoint"); dpStr != "" {
+		dp, err := strconv.ParseFloat(dpStr, 64)
+		if err != nil {
+			h.writeError(w, http.StatusBadRequest, "Invalid dewpoint value", "INVALID_PARAMS")
+			return
+		}
+		h.writeTestResponse(w, dp)
+		return
+	}
+
 	lat, lon, err := h.parseCoordinates(r)
 	if err != nil {
 		h.writeError(w, http.StatusBadRequest, err.Error(), "INVALID_PARAMS")
@@ -86,6 +100,33 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			Station: obs.Station,
 		},
 		Timestamp: obs.Timestamp.Format("2006-01-02T15:04:05Z"),
+		AllClear:  result.AllClear,
+	}
+
+	h.writeJSON(w, http.StatusOK, resp)
+}
+
+// writeTestResponse builds a response from a simulated dewpoint value
+func (h *Handler) writeTestResponse(w http.ResponseWriter, dewpointF float64) {
+	result := index.Evaluate(dewpointF)
+	// Simulate a temperature roughly 10 degrees above the dewpoint
+	tempF := math.Round((dewpointF+10)*10) / 10
+
+	resp := Response{
+		ActiveSystem: string(result.ActiveSystem),
+		SystemName:   result.SystemName,
+		Level:        result.Level,
+		LevelDisplay: result.LevelDisplay,
+		Dewpoint:     math.Round(dewpointF*10) / 10,
+		Temperature:  tempF,
+		Descriptor:   result.Descriptor,
+		Description:  result.Description,
+		Location: Location{
+			City:    "Test Mode",
+			State:   "SIM",
+			Station: "KTEST",
+		},
+		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
 		AllClear:  result.AllClear,
 	}
 
