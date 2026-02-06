@@ -17,6 +17,7 @@ type Response struct {
 	Level        *int     `json:"level"`
 	LevelDisplay string   `json:"levelDisplay"`
 	Dewpoint     float64  `json:"dewpoint"`
+	Temperature  float64  `json:"temperature"`
 	Descriptor   string   `json:"descriptor"`
 	Description  string   `json:"description"`
 	Location     Location `json:"location"`
@@ -76,6 +77,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		Level:        result.Level,
 		LevelDisplay: result.LevelDisplay,
 		Dewpoint:     obs.DewpointF,
+		Temperature:  obs.TemperatureF,
 		Descriptor:   result.Descriptor,
 		Description:  result.Description,
 		Location: Location{

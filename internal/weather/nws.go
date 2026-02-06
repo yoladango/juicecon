@@ -80,15 +80,21 @@ func (c *Client) GetObservation(lat, lon float64) (*Observation, error) {
 	dewpointC := *obs.Properties.Dewpoint.Value
 	dewpointF := celsiusToFahrenheit(dewpointC)
 
+	var temperatureF float64
+	if obs.Properties.Temperature.Value != nil {
+		temperatureF = celsiusToFahrenheit(*obs.Properties.Temperature.Value)
+	}
+
 	timestamp, _ := time.Parse(time.RFC3339, obs.Properties.Timestamp)
 
 	return &Observation{
-		DewpointC: dewpointC,
-		DewpointF: dewpointF,
-		Timestamp: timestamp,
-		Station:   stationID,
-		City:      points.Properties.RelativeLocation.Properties.City,
-		State:     points.Properties.RelativeLocation.Properties.State,
+		DewpointC:    dewpointC,
+		DewpointF:    dewpointF,
+		TemperatureF: temperatureF,
+		Timestamp:    timestamp,
+		Station:      stationID,
+		City:         points.Properties.RelativeLocation.Properties.City,
+		State:        points.Properties.RelativeLocation.Properties.State,
 	}, nil
 }
 

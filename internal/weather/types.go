@@ -4,12 +4,13 @@ import "time"
 
 // Observation represents weather observation data
 type Observation struct {
-	DewpointC float64
-	DewpointF float64
-	Timestamp time.Time
-	Station   string
-	City      string
-	State     string
+	DewpointC    float64
+	DewpointF    float64
+	TemperatureF float64
+	Timestamp    time.Time
+	Station      string
+	City         string
+	State        string
 }
 
 // NWSPointsResponse represents the NWS points API response
@@ -37,6 +38,10 @@ type NWSStationsResponse struct {
 // NWSObservationResponse represents the NWS observation API response
 type NWSObservationResponse struct {
 	Properties struct {
+		Temperature struct {
+			Value    *float64 `json:"value"`
+			UnitCode string   `json:"unitCode"`
+		} `json:"temperature"`
 		Dewpoint struct {
 			Value    *float64 `json:"value"`
 			UnitCode string   `json:"unitCode"`
