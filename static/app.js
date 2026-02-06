@@ -39,10 +39,18 @@
         none: 'DEWCON'
     };
 
+    // Check for test mode dewpoint override via URL param
+    var urlParams = new URLSearchParams(window.location.search);
+    var testDewpoint = urlParams.get('_dewpoint');
+
     // Initialize
     function init() {
         bindEvents();
-        getLocation();
+        if (testDewpoint !== null) {
+            fetchTestDewpoint(testDewpoint);
+        } else {
+            getLocation();
+        }
     }
 
     function bindEvents() {
@@ -84,6 +92,26 @@
             },
             { timeout: 10000 }
         );
+    }
+
+    // Test mode API call — bypasses geolocation, sends dewpoint directly
+    function fetchTestDewpoint(dp) {
+        showLoading();
+        fetch('/api/juicecon?dewpoint=' + encodeURIComponent(dp))
+            .then(function(response) {
+                return response.json().then(function(data) {
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Unknown error');
+                    }
+                    return data;
+                });
+            })
+            .then(function(data) {
+                updateDisplay(data);
+            })
+            .catch(function(error) {
+                showError(error.message);
+            });
     }
 
     // API

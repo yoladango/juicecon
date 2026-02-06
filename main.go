@@ -36,6 +36,17 @@ func main() {
 	// Serve static files
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
+	// Test panel
+	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		data, err := staticFiles.ReadFile("static/test.html")
+		if err != nil {
+			http.Error(w, "Not found", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		w.Write(data)
+	})
+
 	// Root serves index.html
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
