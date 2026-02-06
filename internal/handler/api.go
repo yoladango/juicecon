@@ -6,12 +6,14 @@ import (
 	"strconv"
 
 	"juicecon-golang/internal/geo"
-	"juicecon-golang/internal/juicecon"
+	"juicecon-golang/internal/index"
 	"juicecon-golang/internal/weather"
 )
 
-// Response represents the API response
+// Response represents the unified API response
 type Response struct {
+	ActiveSystem string   `json:"activeSystem"`
+	SystemName   string   `json:"systemName"`
 	Level        *int     `json:"level"`
 	LevelDisplay string   `json:"levelDisplay"`
 	Dewpoint     float64  `json:"dewpoint"`
@@ -66,21 +68,23 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	level := juicecon.Calculate(obs.DewpointF)
+	result := index.Evaluate(obs.DewpointF)
 
 	resp := Response{
-		Level:        level.Level,
-		LevelDisplay: level.LevelDisplay(),
+		ActiveSystem: string(result.ActiveSystem),
+		SystemName:   result.SystemName,
+		Level:        result.Level,
+		LevelDisplay: result.LevelDisplay,
 		Dewpoint:     obs.DewpointF,
-		Descriptor:   level.Descriptor,
-		Description:  level.Description,
+		Descriptor:   result.Descriptor,
+		Description:  result.Description,
 		Location: Location{
 			City:    obs.City,
 			State:   obs.State,
 			Station: obs.Station,
 		},
 		Timestamp: obs.Timestamp.Format("2006-01-02T15:04:05Z"),
-		AllClear:  level.AllClear,
+		AllClear:  result.AllClear,
 	}
 
 	h.writeJSON(w, http.StatusOK, resp)

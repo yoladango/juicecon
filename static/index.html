@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JUICECON - Dewpoint Severity Index</title>
+    <title>DEWCON - Atmospheric Moisture Assessment System</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
@@ -30,13 +30,17 @@
                 <div class="level-container">
                     <div class="level-label">CURRENT THREAT LEVEL</div>
                     <div id="level-number" class="level-number">3</div>
-                    <div class="level-prefix">JUICECON</div>
+                    <div id="level-prefix" class="level-prefix">JUICECON</div>
                 </div>
 
                 <div id="descriptor" class="descriptor">UNBEARABLE</div>
                 <div id="description" class="description">"The air has weight. You are breathing soup."</div>
 
                 <div class="data-panel">
+                    <div class="data-row">
+                        <span class="data-label">PROTOCOL</span>
+                        <span id="protocol" class="data-value">JUICECON</span>
+                    </div>
                     <div class="data-row">
                         <span class="data-label">DEWPOINT</span>
                         <span id="dewpoint" class="data-value">71.2°F</span>
@@ -78,8 +82,9 @@
         </main>
 
         <footer class="footer">
-            <div class="footer-text">JUICECON SYSTEM v1.0 // PROPRIETARY DEWPOINT ASSESSMENT PROTOCOL</div>
+            <div class="footer-text">DEWCON SYSTEM v2.0 // ATMOSPHERIC MOISTURE ASSESSMENT PROTOCOL</div>
             <div class="footer-credit">Juicecon System designed by Joe Tritschler</div>
+            <div class="footer-credit">Cunningham Crackle Factor designed by Dan Branstrator</div>
             <div class="footer-credit">App developed by Dan Branstrator</div>
         </footer>
     </div>
