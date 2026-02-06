@@ -355,6 +355,63 @@ body {
     color: var(--text-dim);
 }
 
+/* Info Button */
+.info-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid var(--text-dim);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    padding: 0;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: all 0.2s ease;
+}
+
+.info-btn:hover {
+    border-color: var(--text-secondary);
+    color: var(--text-secondary);
+}
+
+/* Info Modal */
+.info-modal-content {
+    max-width: 460px;
+}
+
+.info-body {
+    text-align: left;
+}
+
+.info-section {
+    margin-bottom: 20px;
+}
+
+.info-section:last-child {
+    margin-bottom: 0;
+}
+
+.info-title {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+}
+
+.info-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
 /* Utility */
 .hidden {
     display: none !important;

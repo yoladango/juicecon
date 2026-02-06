@@ -11,6 +11,7 @@
     var descriptorEl = document.getElementById('descriptor');
     var descriptionEl = document.getElementById('description');
     var protocolEl = document.getElementById('protocol');
+    var temperatureEl = document.getElementById('temperature');
     var dewpointEl = document.getElementById('dewpoint');
     var locationEl = document.getElementById('location');
     var stationEl = document.getElementById('station');
@@ -22,6 +23,9 @@
     var zipInput = document.getElementById('zip-input');
     var modalCancel = document.getElementById('modal-cancel');
     var modalSubmit = document.getElementById('modal-submit');
+    var infoBtn = document.getElementById('info-btn');
+    var infoModal = document.getElementById('info-modal');
+    var infoClose = document.getElementById('info-close');
 
     // State
     var currentLat = null;
@@ -49,6 +53,12 @@
         modalSubmit.addEventListener('click', submitZip);
         zipInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') submitZip();
+        });
+        infoBtn.addEventListener('click', function() {
+            infoModal.classList.remove('hidden');
+        });
+        infoClose.addEventListener('click', function() {
+            infoModal.classList.add('hidden');
         });
     }
 
@@ -138,6 +148,7 @@
 
         // Update data panel
         protocolEl.textContent = systemNames[system] || 'DEWCON';
+        temperatureEl.textContent = data.temperature ? data.temperature.toFixed(1) + '\u00B0F' : '--\u00B0F';
         dewpointEl.textContent = data.dewpoint.toFixed(1) + '\u00B0F';
         locationEl.textContent = data.location.city + ', ' + data.location.state;
         stationEl.textContent = data.location.station;

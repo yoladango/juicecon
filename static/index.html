@@ -38,12 +38,16 @@
 
                 <div class="data-panel">
                     <div class="data-row">
-                        <span class="data-label">PROTOCOL</span>
+                        <span class="data-label">PROTOCOL <button id="info-btn" class="info-btn" aria-label="Protocol information">?</button></span>
                         <span id="protocol" class="data-value">JUICECON</span>
                     </div>
                     <div class="data-row">
+                        <span class="data-label">TEMPERATURE</span>
+                        <span id="temperature" class="data-value">--°F</span>
+                    </div>
+                    <div class="data-row">
                         <span class="data-label">DEWPOINT</span>
-                        <span id="dewpoint" class="data-value">71.2°F</span>
+                        <span id="dewpoint" class="data-value">--°F</span>
                     </div>
                     <div class="data-row">
                         <span class="data-label">LOCATION</span>
@@ -80,6 +84,29 @@
                 </div>
             </div>
         </main>
+
+            <div id="info-modal" class="modal hidden">
+                <div class="modal-content info-modal-content">
+                    <div class="modal-header">PROTOCOL INFORMATION</div>
+                    <div class="modal-body info-body">
+                        <div class="info-section">
+                            <div class="info-title">DEWCON</div>
+                            <div class="info-text">The unified Atmospheric Moisture Assessment System. DEWCON monitors dewpoint conditions and activates the appropriate sub-protocol based on current readings.</div>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-title">JUICECON</div>
+                            <div class="info-text">Activates when dewpoint reaches 60°F or above. Monitors humidity severity on a descending scale (JC1 = worst). Designed by Joe Tritschler.</div>
+                        </div>
+                        <div class="info-section">
+                            <div class="info-title">CCF — CUNNINGHAM CRACKLE FACTOR</div>
+                            <div class="info-text">Activates when dewpoint drops to 25°F or below. Monitors dryness severity on an ascending scale (CCF5 = worst). Tracks static shock risk, skin crackle potential, and general atmospheric desiccation. Designed by Dan Branstrator.</div>
+                        </div>
+                    </div>
+                    <div class="modal-actions">
+                        <button id="info-close" class="btn">DISMISS</button>
+                    </div>
+                </div>
+            </div>
 
         <footer class="footer">
             <div class="footer-text">DEWCON SYSTEM v2.0 // ATMOSPHERIC MOISTURE ASSESSMENT PROTOCOL</div>
