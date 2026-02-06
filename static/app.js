@@ -2,29 +2,38 @@
     'use strict';
 
     // Elements
-    const loadingEl = document.getElementById('loading');
-    const errorEl = document.getElementById('error');
-    const errorMessageEl = document.getElementById('error-message');
-    const displayEl = document.getElementById('display');
-    const levelNumberEl = document.getElementById('level-number');
-    const descriptorEl = document.getElementById('descriptor');
-    const descriptionEl = document.getElementById('description');
-    const dewpointEl = document.getElementById('dewpoint');
-    const locationEl = document.getElementById('location');
-    const stationEl = document.getElementById('station');
-    const timestampEl = document.getElementById('timestamp');
-    const refreshBtn = document.getElementById('refresh-btn');
-    const locationBtn = document.getElementById('location-btn');
-    const retryBtn = document.getElementById('retry-btn');
-    const modalEl = document.getElementById('location-modal');
-    const zipInput = document.getElementById('zip-input');
-    const modalCancel = document.getElementById('modal-cancel');
-    const modalSubmit = document.getElementById('modal-submit');
+    var loadingEl = document.getElementById('loading');
+    var errorEl = document.getElementById('error');
+    var errorMessageEl = document.getElementById('error-message');
+    var displayEl = document.getElementById('display');
+    var levelNumberEl = document.getElementById('level-number');
+    var levelPrefixEl = document.getElementById('level-prefix');
+    var descriptorEl = document.getElementById('descriptor');
+    var descriptionEl = document.getElementById('description');
+    var protocolEl = document.getElementById('protocol');
+    var dewpointEl = document.getElementById('dewpoint');
+    var locationEl = document.getElementById('location');
+    var stationEl = document.getElementById('station');
+    var timestampEl = document.getElementById('timestamp');
+    var refreshBtn = document.getElementById('refresh-btn');
+    var locationBtn = document.getElementById('location-btn');
+    var retryBtn = document.getElementById('retry-btn');
+    var modalEl = document.getElementById('location-modal');
+    var zipInput = document.getElementById('zip-input');
+    var modalCancel = document.getElementById('modal-cancel');
+    var modalSubmit = document.getElementById('modal-submit');
 
     // State
-    let currentLat = null;
-    let currentLon = null;
-    let currentZip = null;
+    var currentLat = null;
+    var currentLon = null;
+    var currentZip = null;
+
+    // System display names
+    var systemNames = {
+        juicecon: 'JUICECON',
+        ccf: 'CUNNINGHAM CRACKLE FACTOR',
+        none: 'DEWCON'
+    };
 
     // Initialize
     function init() {
@@ -57,7 +66,7 @@
                 currentLat = position.coords.latitude;
                 currentLon = position.coords.longitude;
                 currentZip = null;
-                fetchJuicecon();
+                fetchData();
             },
             function(error) {
                 console.log('Geolocation error:', error);
@@ -68,10 +77,10 @@
     }
 
     // API
-    function fetchJuicecon() {
+    function fetchData() {
         showLoading();
 
-        let url = '/api/juicecon?';
+        var url = '/api/juicecon?';
         if (currentZip) {
             url += 'zip=' + encodeURIComponent(currentZip);
         } else if (currentLat !== null && currentLon !== null) {
@@ -100,8 +109,11 @@
 
     // Display
     function updateDisplay(data) {
-        // Set level color
-        const level = data.allClear ? 'clear' : data.level;
+        var system = data.activeSystem || 'none';
+        var level = data.allClear ? 'clear' : data.level;
+
+        // Set system and level on body for CSS color switching
+        document.body.setAttribute('data-system', system);
         document.body.setAttribute('data-level', level);
 
         // Update level number
@@ -113,12 +125,20 @@
             levelNumberEl.classList.remove('all-clear');
         }
 
+        // Update system prefix label
+        if (data.allClear && system === 'none') {
+            levelPrefixEl.textContent = 'DEWCON';
+        } else {
+            levelPrefixEl.textContent = data.systemName || 'DEWCON';
+        }
+
         // Update text
         descriptorEl.textContent = data.descriptor.toUpperCase();
         descriptionEl.textContent = '"' + data.description + '"';
 
         // Update data panel
-        dewpointEl.textContent = data.dewpoint.toFixed(1) + '°F';
+        protocolEl.textContent = systemNames[system] || 'DEWCON';
+        dewpointEl.textContent = data.dewpoint.toFixed(1) + '\u00B0F';
         locationEl.textContent = data.location.city + ', ' + data.location.state;
         stationEl.textContent = data.location.station;
         timestampEl.textContent = formatTimestamp(data.timestamp);
@@ -128,7 +148,7 @@
 
     function formatTimestamp(isoString) {
         try {
-            const date = new Date(isoString);
+            var date = new Date(isoString);
             return date.toLocaleTimeString('en-US', {
                 hour: 'numeric',
                 minute: '2-digit',
@@ -172,12 +192,12 @@
         modalEl.classList.add('hidden');
         // If we don't have a location, show error
         if (currentLat === null && currentZip === null) {
-            showError('Please enter a ZIP code to check JUICECON status');
+            showError('Please enter a ZIP code to check DEWCON status');
         }
     }
 
     function submitZip() {
-        const zip = zipInput.value.trim();
+        var zip = zipInput.value.trim();
         if (!/^\d{5}$/.test(zip)) {
             zipInput.style.borderColor = '#ef4444';
             return;
@@ -187,14 +207,14 @@
         currentLat = null;
         currentLon = null;
         hideModal();
-        fetchJuicecon();
+        fetchData();
     }
 
     function refresh() {
         if (currentZip) {
-            fetchJuicecon();
+            fetchData();
         } else if (currentLat !== null) {
-            fetchJuicecon();
+            fetchData();
         } else {
             getLocation();
         }

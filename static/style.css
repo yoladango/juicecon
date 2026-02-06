@@ -1,10 +1,19 @@
 :root {
+    /* JuiceCon colors (humidity - warm reds/oranges) */
     --jc-clear: #22c55e;
     --jc-5: #eab308;
     --jc-4: #f97316;
     --jc-3: #ef4444;
     --jc-2: #dc2626;
     --jc-1: #991b1b;
+
+    /* CCF colors (dryness - cool blues/purples) */
+    --ccf-clear: #22c55e;
+    --ccf-1: #7dd3fc;
+    --ccf-2: #38bdf8;
+    --ccf-3: #6366f1;
+    --ccf-4: #8b5cf6;
+    --ccf-5: #c084fc;
 
     --bg-dark: #0a0a0a;
     --bg-panel: #141414;
@@ -351,22 +360,53 @@ body {
     display: none !important;
 }
 
-/* Level-specific colors */
-[data-level="clear"] { --level-color: var(--jc-clear); }
-[data-level="5"] { --level-color: var(--jc-5); }
-[data-level="4"] { --level-color: var(--jc-4); }
-[data-level="3"] { --level-color: var(--jc-3); }
-[data-level="2"] { --level-color: var(--jc-2); }
-[data-level="1"] { --level-color: var(--jc-1); }
+/* ============================================
+   JuiceCon level colors (humidity / high dewpoint)
+   ============================================ */
+[data-system="juicecon"][data-level="clear"] { --level-color: var(--jc-clear); }
+[data-system="juicecon"][data-level="5"] { --level-color: var(--jc-5); }
+[data-system="juicecon"][data-level="4"] { --level-color: var(--jc-4); }
+[data-system="juicecon"][data-level="3"] { --level-color: var(--jc-3); }
+[data-system="juicecon"][data-level="2"] { --level-color: var(--jc-2); }
+[data-system="juicecon"][data-level="1"] { --level-color: var(--jc-1); }
 
-/* JC1 pulsing animation */
-[data-level="1"] .level-number {
+/* ============================================
+   CCF level colors (dryness / low dewpoint)
+   ============================================ */
+[data-system="ccf"][data-level="clear"] { --level-color: var(--ccf-clear); }
+[data-system="ccf"][data-level="1"] { --level-color: var(--ccf-1); }
+[data-system="ccf"][data-level="2"] { --level-color: var(--ccf-2); }
+[data-system="ccf"][data-level="3"] { --level-color: var(--ccf-3); }
+[data-system="ccf"][data-level="4"] { --level-color: var(--ccf-4); }
+[data-system="ccf"][data-level="5"] { --level-color: var(--ccf-5); }
+
+/* All-clear state (neither system active) */
+[data-system="none"][data-level="clear"] { --level-color: var(--jc-clear); }
+
+/* Legacy fallbacks */
+[data-level="clear"] { --level-color: var(--jc-clear); }
+
+/* JC1 pulsing animation (worst humidity) */
+[data-system="juicecon"][data-level="1"] .level-number {
     animation: pulse 2s ease-in-out infinite;
+}
+
+/* CCF5 crackle animation (worst dryness) */
+[data-system="ccf"][data-level="5"] .level-number {
+    animation: crackle 0.15s ease-in-out infinite;
 }
 
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.6; }
+}
+
+@keyframes crackle {
+    0% { text-shadow: 0 0 60px var(--level-color); }
+    25% { text-shadow: 0 0 80px var(--level-color), 2px -2px 0px #fff; }
+    50% { text-shadow: 0 0 40px var(--level-color); }
+    75% { text-shadow: 0 0 90px var(--level-color), -1px 1px 0px #e0e7ff; }
+    100% { text-shadow: 0 0 60px var(--level-color); }
 }
 
 /* Responsive */

@@ -51,6 +51,6 @@ func main() {
 		w.Write(data)
 	})
 
-	log.Printf("JUICECON server starting on port %s", port)
+	log.Printf("DEWCON system starting on port %s", port)
 	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
