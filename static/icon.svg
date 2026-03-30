@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="64" fill="#0a0a0a"/>
+  <text x="256" y="200" font-family="monospace" font-size="72" font-weight="bold" fill="#ef4444" text-anchor="middle">DEWCON</text>
+  <text x="256" y="300" font-family="monospace" font-size="120" font-weight="bold" fill="#facc15" text-anchor="middle">1</text>
+  <rect x="80" y="340" width="352" height="4" rx="2" fill="#ef4444" opacity="0.6"/>
+  <text x="256" y="400" font-family="monospace" font-size="32" fill="#9ca3af" text-anchor="middle">MOISTURE THREAT</text>
+</svg>
