@@ -2,18 +2,25 @@ package main
 
 import (
 	"embed"
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"juicecon-golang/internal/handler"
 )
+
+var startTime time.Time
 
 //go:embed static
 var staticFiles embed.FS
 
 func main() {
+	startTime = time.Now()
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -32,6 +39,15 @@ func main() {
 
 	// API endpoint
 	mux.Handle("/api/juicecon", apiHandler)
+
+	// Health check
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{
+			"status": "ok",
+			"uptime": fmt.Sprintf("%s", time.Since(startTime).Round(time.Second)),
+		})
+	})
 
 	// Serve static files
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))

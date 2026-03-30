@@ -1,11 +1,11 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
-
-	"math"
 	"time"
 
 	"juicecon-golang/internal/geo"
@@ -41,15 +41,27 @@ type ErrorResponse struct {
 	Code  string `json:"code"`
 }
 
+// WeatherClient defines the interface for fetching weather observations.
+type WeatherClient interface {
+	GetObservation(ctx context.Context, lat, lon float64) (*weather.Observation, error)
+}
+
 // Handler handles API requests
 type Handler struct {
-	weatherClient *weather.Client
+	weatherClient WeatherClient
 }
 
 // New creates a new API handler
 func New() *Handler {
 	return &Handler{
 		weatherClient: weather.NewClient(),
+	}
+}
+
+// NewWithClient creates a handler with a custom weather client (useful for testing).
+func NewWithClient(client WeatherClient) *Handler {
+	return &Handler{
+		weatherClient: client,
 	}
 }
 
@@ -77,7 +89,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	obs, err := h.weatherClient.GetObservation(lat, lon)
+	obs, err := h.weatherClient.GetObservation(r.Context(), lat, lon)
 	if err != nil {
 		h.writeError(w, http.StatusBadGateway, "Unable to fetch weather data: "+err.Error(), "WEATHER_API_ERROR")
 		return

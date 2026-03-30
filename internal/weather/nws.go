@@ -1,6 +1,7 @@
 package weather
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -13,9 +14,14 @@ const (
 	httpTimeout = 10 * time.Second
 )
 
+// HTTPDoer abstracts HTTP request execution for testability.
+type HTTPDoer interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // Client handles NWS API requests
 type Client struct {
-	httpClient *http.Client
+	httpClient HTTPDoer
 }
 
 // NewClient creates a new NWS API client
@@ -28,10 +34,10 @@ func NewClient() *Client {
 }
 
 // GetObservation fetches the current weather observation for a location
-func (c *Client) GetObservation(lat, lon float64) (*Observation, error) {
+func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observation, error) {
 	// Step 1: Get the points data to find station and location info
 	pointsURL := fmt.Sprintf("%s/points/%.4f,%.4f", nwsBaseURL, lat, lon)
-	pointsResp, err := c.makeRequest(pointsURL)
+	pointsResp, err := c.makeRequest(ctx, pointsURL)
 	if err != nil {
 		return nil, fmt.Errorf("points lookup failed: %w", err)
 	}
@@ -43,7 +49,7 @@ func (c *Client) GetObservation(lat, lon float64) (*Observation, error) {
 	}
 
 	// Step 2: Get the stations list to find the nearest station
-	stationsResp, err := c.makeRequest(points.Properties.ObservationStations)
+	stationsResp, err := c.makeRequest(ctx, points.Properties.ObservationStations)
 	if err != nil {
 		return nil, fmt.Errorf("stations lookup failed: %w", err)
 	}
@@ -62,7 +68,7 @@ func (c *Client) GetObservation(lat, lon float64) (*Observation, error) {
 
 	// Step 3: Get the latest observation from the nearest station
 	obsURL := fmt.Sprintf("%s/stations/%s/observations/latest", nwsBaseURL, stationID)
-	obsResp, err := c.makeRequest(obsURL)
+	obsResp, err := c.makeRequest(ctx, obsURL)
 	if err != nil {
 		return nil, fmt.Errorf("observation lookup failed: %w", err)
 	}
@@ -98,8 +104,8 @@ func (c *Client) GetObservation(lat, lon float64) (*Observation, error) {
 	}, nil
 }
 
-func (c *Client) makeRequest(url string) (*http.Response, error) {
-	req, err := http.NewRequest("GET", url, nil)
+func (c *Client) makeRequest(ctx context.Context, url string) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
