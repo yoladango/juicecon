@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"math"
 	"net/http"
 	"regexp"
@@ -56,10 +56,19 @@ type Handler struct {
 	weatherClient WeatherClient
 }
 
-// New creates a new API handler
+// New creates a new API handler with a default weather client.
 func New() *Handler {
 	return &Handler{
 		weatherClient: weather.NewClient(),
+	}
+}
+
+// NewWithWeatherClient creates a handler with the given weather client,
+// allowing the caller to share the client (and its cache) with other
+// components such as the healthz endpoint.
+func NewWithWeatherClient(client WeatherClient) *Handler {
+	return &Handler{
+		weatherClient: client,
 	}
 }
 
@@ -70,7 +79,7 @@ func NewWithClient(client WeatherClient) *Handler {
 	}
 }
 
-// ServeHTTP handles the /api/juicecon endpoint
+// ServeHTTP handles the /api/dewcon endpoint (also served at /api/juicecon for backward compat)
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		h.writeError(w, http.StatusMethodNotAllowed, "Method not allowed", "METHOD_NOT_ALLOWED")
@@ -96,7 +105,11 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	obs, err := h.weatherClient.GetObservation(r.Context(), lat, lon)
 	if err != nil {
-		log.Printf("weather API error for lat=%.4f lon=%.4f: %v", lat, lon, err)
+		slog.Error("weather API error",
+			slog.Float64("lat", lat),
+			slog.Float64("lon", lon),
+			slog.String("error", err.Error()),
+		)
 		h.writeError(w, http.StatusBadGateway, "Unable to retrieve weather data. Please try again.", "WEATHER_API_ERROR")
 		return
 	}

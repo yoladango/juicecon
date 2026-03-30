@@ -85,7 +85,7 @@ func TestRateLimiter_Wrap_OnlyAPIRoutes(t *testing.T) {
 	handler := rl.Wrap("/api/", inner)
 
 	// First API request: allowed
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip=43215", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?zip=43215", nil)
 	req.RemoteAddr = "1.2.3.4:1234"
 	rec := httptest.NewRecorder()
 	handler.ServeHTTP(rec, req)

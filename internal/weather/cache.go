@@ -63,3 +63,23 @@ func (c *observationCache) set(key string, obs *Observation) {
 		expiresAt: c.now().Add(c.ttl),
 	}
 }
+
+// CacheStats holds cache metrics.
+type CacheStats struct {
+	Entries int `json:"entries"`
+}
+
+// stats returns the current number of non-expired entries in the cache.
+func (c *observationCache) stats() CacheStats {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+
+	now := c.now()
+	count := 0
+	for _, entry := range c.entries {
+		if now.Before(entry.expiresAt) || now.Equal(entry.expiresAt) {
+			count++
+		}
+	}
+	return CacheStats{Entries: count}
+}

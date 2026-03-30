@@ -26,6 +26,7 @@
     var infoBtn = document.getElementById('info-btn');
     var infoModal = document.getElementById('info-modal');
     var infoClose = document.getElementById('info-close');
+    var shareBtn = document.getElementById('share-btn');
     var refreshStatusEl = document.getElementById('refresh-status');
     var refreshStatusTextEl = document.getElementById('refresh-status-text');
 
@@ -36,6 +37,7 @@
     var autoRefreshTimer = null;
     var lastRefreshTime = null;
     var modalTriggerElement = null;
+    var currentData = null;
 
     var AUTO_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
 
@@ -79,6 +81,7 @@
         infoClose.addEventListener('click', function() {
             closeModal(infoModal);
         });
+        shareBtn.addEventListener('click', shareDewcon);
 
         // Global Escape key handler for modals
         document.addEventListener('keydown', function(e) {
@@ -243,7 +246,7 @@
     // Test mode API call -- bypasses geolocation, sends dewpoint directly
     function fetchTestDewpoint(dp) {
         showLoading();
-        fetch('/api/juicecon?dewpoint=' + encodeURIComponent(dp))
+        fetch('/api/dewcon?dewpoint=' + encodeURIComponent(dp))
             .then(function(response) {
                 return response.json().then(function(data) {
                     if (!response.ok) {
@@ -264,7 +267,7 @@
     function fetchData() {
         showLoading();
 
-        var url = '/api/juicecon?';
+        var url = '/api/dewcon?';
         if (currentZip) {
             url += 'zip=' + encodeURIComponent(currentZip);
         } else if (currentLat !== null && currentLon !== null) {
@@ -293,6 +296,7 @@
 
     // Display
     function updateDisplay(data) {
+        currentData = data;
         var system = data.activeSystem || 'none';
         var level = data.allClear ? 'clear' : data.level;
 
@@ -346,6 +350,59 @@
             });
         } catch (e) {
             return '--:-- --';
+        }
+    }
+
+    // Share
+    function shareDewcon() {
+        if (!currentData) return;
+
+        var data = currentData;
+        var system = data.activeSystem || 'none';
+        var levelText;
+        if (data.allClear) {
+            levelText = 'DEWCON ALL CLEAR';
+        } else {
+            var prefix = data.systemName || 'DEWCON';
+            levelText = prefix + ' ' + data.level;
+        }
+
+        var locationText = data.location.city + ', ' + data.location.state;
+        var shareText = levelText + ' in ' + locationText + ' // Dewpoint: ' + data.dewpoint.toFixed(1) + '\u00B0F // ' + data.descriptor;
+        var shareUrl = 'https://juicecon.fly.dev';
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'DEWCON - Atmospheric Moisture Assessment',
+                text: shareText,
+                url: shareUrl
+            }).catch(function(err) {
+                // User cancelled or share failed, ignore
+            });
+        } else {
+            var clipboardText = shareText + ' ' + shareUrl;
+            navigator.clipboard.writeText(clipboardText).then(function() {
+                var original = shareBtn.textContent;
+                shareBtn.textContent = 'COPIED';
+                setTimeout(function() {
+                    shareBtn.textContent = original;
+                }, 2000);
+            }).catch(function() {
+                // Fallback for older browsers without clipboard API
+                var textArea = document.createElement('textarea');
+                textArea.value = clipboardText;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                var original = shareBtn.textContent;
+                shareBtn.textContent = 'COPIED';
+                setTimeout(function() {
+                    shareBtn.textContent = original;
+                }, 2000);
+            });
         }
     }
 

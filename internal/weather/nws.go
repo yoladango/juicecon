@@ -35,6 +35,11 @@ func NewClient() *Client {
 	}
 }
 
+// CacheStats returns metrics about the observation cache.
+func (c *Client) CacheStats() CacheStats {
+	return c.cache.stats()
+}
+
 // GetObservation fetches the current weather observation for a location.
 // Results are cached in memory; repeated calls for the same (rounded) lat/lon
 // within the TTL window are served from cache without hitting the NWS API.

@@ -29,7 +29,7 @@ func floatPtr(v float64) *float64 {
 
 func TestTestModeDewpoint71(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?dewpoint=71", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?dewpoint=71", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -65,7 +65,7 @@ func TestTestModeDewpoint71(t *testing.T) {
 
 func TestTestModeExtremeCold(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?dewpoint=-5", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?dewpoint=-5", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -95,7 +95,7 @@ func TestTestModeExtremeCold(t *testing.T) {
 
 func TestTestModeComfortZone(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?dewpoint=45", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?dewpoint=45", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -125,7 +125,7 @@ func TestTestModeComfortZone(t *testing.T) {
 
 func TestInvalidMethod(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodPost, "/api/juicecon", nil)
+	req := httptest.NewRequest(http.MethodPost, "/api/dewcon", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -146,7 +146,7 @@ func TestInvalidMethod(t *testing.T) {
 
 func TestMissingParameters(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -167,7 +167,7 @@ func TestMissingParameters(t *testing.T) {
 
 func TestInvalidZIP(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip=00000", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?zip=00000", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -188,7 +188,7 @@ func TestInvalidZIP(t *testing.T) {
 
 func TestInvalidDewpointParam(t *testing.T) {
 	h := New()
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?dewpoint=abc", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?dewpoint=abc", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)
@@ -227,7 +227,7 @@ func TestInvalidZIPFormat(t *testing.T) {
 			continue
 		}
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip="+tt.zip, nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/dewcon?zip="+tt.zip, nil)
 			rec := httptest.NewRecorder()
 			h.ServeHTTP(rec, req)
 
@@ -262,7 +262,7 @@ func TestLatitudeOutOfRange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat="+tt.lat+"&lon=-87.6298", nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/dewcon?lat="+tt.lat+"&lon=-87.6298", nil)
 			rec := httptest.NewRecorder()
 			h.ServeHTTP(rec, req)
 
@@ -297,7 +297,7 @@ func TestLongitudeOutOfRange(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat=41.8781&lon="+tt.lon, nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/dewcon?lat=41.8781&lon="+tt.lon, nil)
 			rec := httptest.NewRecorder()
 			h.ServeHTTP(rec, req)
 
@@ -325,7 +325,7 @@ func TestWeatherAPIErrorSanitized(t *testing.T) {
 	}
 	h := NewWithClient(mock)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip=10001", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?zip=10001", nil)
 	rec := httptest.NewRecorder()
 	h.ServeHTTP(rec, req)
 
@@ -378,7 +378,7 @@ func TestValidLatLonBoundaries(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat="+tt.lat+"&lon="+tt.lon, nil)
+			req := httptest.NewRequest(http.MethodGet, "/api/dewcon?lat="+tt.lat+"&lon="+tt.lon, nil)
 			rec := httptest.NewRecorder()
 			h.ServeHTTP(rec, req)
 
@@ -403,7 +403,7 @@ func TestValidZIPWithMockClient(t *testing.T) {
 	}
 	h := NewWithClient(mock)
 
-	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip=10001", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/dewcon?zip=10001", nil)
 	rec := httptest.NewRecorder()
 
 	h.ServeHTTP(rec, req)

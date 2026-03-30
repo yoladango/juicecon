@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -114,7 +114,7 @@ func (rl *RateLimiter) cleanup() {
 			delete(rl.visitors, ip)
 		}
 	}
-	log.Printf("Rate limiter cleanup: %d active visitors", len(rl.visitors))
+	slog.Info("rate limiter cleanup", slog.Int("active_visitors", len(rl.visitors)))
 }
 
 // extractIP pulls the client IP from X-Forwarded-For, X-Real-IP, or

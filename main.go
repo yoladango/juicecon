@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,6 +15,7 @@ import (
 
 	"juicecon-golang/internal/handler"
 	"juicecon-golang/internal/middleware"
+	"juicecon-golang/internal/weather"
 )
 
 var startTime time.Time
@@ -25,33 +26,47 @@ var staticFiles embed.FS
 func main() {
 	startTime = time.Now()
 
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
 
+	// Weather client (shared by API handler and healthz)
+	weatherClient := weather.NewClient()
+
 	// API handler
-	apiHandler := handler.New()
+	apiHandler := handler.NewWithWeatherClient(weatherClient)
 
 	// Static file server
 	staticFS, err := fs.Sub(staticFiles, "static")
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("failed to create static filesystem", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
 
 	mux := http.NewServeMux()
 
-	// API endpoint
+	// API endpoint (primary)
+	mux.Handle("/api/dewcon", apiHandler)
+	// Backward-compatible alias
 	mux.Handle("/api/juicecon", apiHandler)
 
 	// Health check
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(map[string]string{
-			"status": "ok",
-			"uptime": fmt.Sprintf("%s", time.Since(startTime).Round(time.Second)),
-		}); err != nil {
-			log.Printf("healthz: failed to write response: %v", err)
+		resp := struct {
+			Status string              `json:"status"`
+			Uptime string              `json:"uptime"`
+			Cache  weather.CacheStats  `json:"cache"`
+		}{
+			Status: "ok",
+			Uptime: fmt.Sprintf("%s", time.Since(startTime).Round(time.Second)),
+			Cache:  weatherClient.CacheStats(),
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			slog.Error("healthz: failed to write response", slog.String("error", err.Error()))
 		}
 	})
 
@@ -71,7 +86,7 @@ func main() {
 		}
 		w.Header().Set("Content-Type", "text/html")
 		if _, err := w.Write(data); err != nil {
-			log.Printf("root: failed to write response: %v", err)
+			slog.Error("root: failed to write response", slog.String("error", err.Error()))
 		}
 	})
 
@@ -94,19 +109,20 @@ func main() {
 
 	go func() {
 		sig := <-quit
-		log.Printf("Received signal %v, shutting down...", sig)
+		slog.Info("received shutdown signal", slog.String("signal", sig.String()))
 
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Printf("Graceful shutdown failed: %v", err)
+			slog.Error("graceful shutdown failed", slog.String("error", err.Error()))
 		}
 	}()
 
-	log.Printf("DEWCON system starting on port %s", port)
+	slog.Info("DEWCON system starting", slog.String("port", port))
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Server error: %v", err)
+		slog.Error("server error", slog.String("error", err.Error()))
+		os.Exit(1)
 	}
-	log.Println("Server stopped")
+	slog.Info("server stopped")
 }
