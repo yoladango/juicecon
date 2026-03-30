@@ -27,3 +27,6 @@
 **/.env
 **/.env.local
 fly.toml
+
+# Claude
+**/.claude
