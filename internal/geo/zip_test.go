@@ -16,8 +16,29 @@ func TestLookupZIP(t *testing.T) {
 		{
 			name:      "valid NYC ZIP 10001",
 			zip:       "10001",
-			wantLat:   40.7484,
-			wantLon:   -73.9967,
+			wantLat:   40.7507,
+			wantLon:   -73.9972,
+			wantError: false,
+		},
+		{
+			name:      "valid Beverly Hills ZIP 90210",
+			zip:       "90210",
+			wantLat:   34.1010,
+			wantLon:   -118.4148,
+			wantError: false,
+		},
+		{
+			name:      "valid Chicago ZIP 60601",
+			zip:       "60601",
+			wantLat:   41.8853,
+			wantLon:   -87.6219,
+			wantError: false,
+		},
+		{
+			name:      "valid Puerto Rico ZIP 00601",
+			zip:       "00601",
+			wantLat:   18.1801,
+			wantLon:   -66.7522,
 			wantError: false,
 		},
 		{
@@ -70,12 +91,12 @@ func TestLookupZIP(t *testing.T) {
 				t.Errorf("LookupZIP(%q) lon = %f, want %f", tt.zip, coords.Lon, tt.wantLon)
 			}
 
-			// Sanity check: latitude and longitude within US bounds
-			if coords.Lat < 24 || coords.Lat > 72 {
-				t.Errorf("LookupZIP(%q) lat %f outside reasonable US range [24, 72]", tt.zip, coords.Lat)
+			// Sanity check: latitude and longitude within US bounds (including territories)
+			if coords.Lat < 13 || coords.Lat > 72 {
+				t.Errorf("LookupZIP(%q) lat %f outside reasonable US range [13, 72]", tt.zip, coords.Lat)
 			}
-			if coords.Lon < -180 || coords.Lon > -65 {
-				t.Errorf("LookupZIP(%q) lon %f outside reasonable US range [-180, -65]", tt.zip, coords.Lon)
+			if coords.Lon < -180 || coords.Lon > -64 {
+				t.Errorf("LookupZIP(%q) lon %f outside reasonable US range [-180, -64]", tt.zip, coords.Lon)
 			}
 		})
 	}

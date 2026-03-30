@@ -82,6 +82,7 @@ func newTestClient(ts *httptest.Server) *Client {
 			target:     ts.URL,
 			underlying: ts.Client(),
 		},
+		cache: newObservationCache(defaultCacheTTL),
 	}
 }
 
@@ -182,8 +183,11 @@ func TestGetObservation_HappyPath(t *testing.T) {
 		t.Errorf("DewpointF = %g, want %g", obs.DewpointF, wantDewF)
 	}
 	wantTempF := celsiusToFahrenheit(tempC)
-	if math.Abs(obs.TemperatureF-wantTempF) > 0.01 {
-		t.Errorf("TemperatureF = %g, want %g", obs.TemperatureF, wantTempF)
+	if obs.TemperatureF == nil {
+		t.Fatal("TemperatureF should not be nil")
+	}
+	if math.Abs(*obs.TemperatureF-wantTempF) > 0.01 {
+		t.Errorf("TemperatureF = %g, want %g", *obs.TemperatureF, wantTempF)
 	}
 	if obs.Timestamp.IsZero() {
 		t.Error("Timestamp should not be zero")
@@ -264,7 +268,7 @@ func TestGetObservation_NilDewpoint(t *testing.T) {
 	}
 }
 
-func TestGetObservation_NilTemperatureDefaultsToZero(t *testing.T) {
+func TestGetObservation_NilTemperatureReturnsNil(t *testing.T) {
 	dewC := 15.0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/points/", func(w http.ResponseWriter, r *http.Request) {
@@ -290,8 +294,8 @@ func TestGetObservation_NilTemperatureDefaultsToZero(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if obs.TemperatureF != 0 {
-		t.Errorf("TemperatureF = %g, want 0 (default for nil temperature)", obs.TemperatureF)
+	if obs.TemperatureF != nil {
+		t.Errorf("TemperatureF = %g, want nil for unavailable temperature", *obs.TemperatureF)
 	}
 	// Dewpoint should still be valid
 	wantDewF := celsiusToFahrenheit(dewC)
@@ -313,6 +317,7 @@ func (d *errorDoer) Do(req *http.Request) (*http.Response, error) {
 func TestGetObservation_NetworkError(t *testing.T) {
 	client := &Client{
 		httpClient: &errorDoer{err: fmt.Errorf("connection refused")},
+		cache:      newObservationCache(defaultCacheTTL),
 	}
 
 	_, err := client.GetObservation(context.Background(), 41.8781, -87.6298)

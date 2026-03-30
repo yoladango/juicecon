@@ -22,6 +22,7 @@ type HTTPDoer interface {
 // Client handles NWS API requests
 type Client struct {
 	httpClient HTTPDoer
+	cache      *observationCache
 }
 
 // NewClient creates a new NWS API client
@@ -30,11 +31,19 @@ func NewClient() *Client {
 		httpClient: &http.Client{
 			Timeout: httpTimeout,
 		},
+		cache: newObservationCache(defaultCacheTTL),
 	}
 }
 
-// GetObservation fetches the current weather observation for a location
+// GetObservation fetches the current weather observation for a location.
+// Results are cached in memory; repeated calls for the same (rounded) lat/lon
+// within the TTL window are served from cache without hitting the NWS API.
 func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observation, error) {
+	key := cacheKey(lat, lon)
+	if cached, ok := c.cache.get(key); ok {
+		return cached, nil
+	}
+
 	// Step 1: Get the points data to find station and location info
 	pointsURL := fmt.Sprintf("%s/points/%.4f,%.4f", nwsBaseURL, lat, lon)
 	pointsResp, err := c.makeRequest(ctx, pointsURL)
@@ -86,14 +95,15 @@ func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observa
 	dewpointC := *obs.Properties.Dewpoint.Value
 	dewpointF := celsiusToFahrenheit(dewpointC)
 
-	var temperatureF float64
+	var temperatureF *float64
 	if obs.Properties.Temperature.Value != nil {
-		temperatureF = celsiusToFahrenheit(*obs.Properties.Temperature.Value)
+		f := celsiusToFahrenheit(*obs.Properties.Temperature.Value)
+		temperatureF = &f
 	}
 
 	timestamp, _ := time.Parse(time.RFC3339, obs.Properties.Timestamp)
 
-	return &Observation{
+	result := &Observation{
 		DewpointC:    dewpointC,
 		DewpointF:    dewpointF,
 		TemperatureF: temperatureF,
@@ -101,7 +111,11 @@ func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observa
 		Station:      stationID,
 		City:         points.Properties.RelativeLocation.Properties.City,
 		State:        points.Properties.RelativeLocation.Properties.State,
-	}, nil
+	}
+
+	c.cache.set(key, result)
+
+	return result, nil
 }
 
 func (c *Client) makeRequest(ctx context.Context, url string) (*http.Response, error) {

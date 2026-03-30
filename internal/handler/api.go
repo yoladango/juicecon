@@ -20,7 +20,7 @@ type Response struct {
 	Level        *int     `json:"level"`
 	LevelDisplay string   `json:"levelDisplay"`
 	Dewpoint     float64  `json:"dewpoint"`
-	Temperature  float64  `json:"temperature"`
+	Temperature  *float64 `json:"temperature"`
 	Descriptor   string   `json:"descriptor"`
 	Description  string   `json:"description"`
 	Location     Location `json:"location"`
@@ -130,7 +130,7 @@ func (h *Handler) writeTestResponse(w http.ResponseWriter, dewpointF float64) {
 		Level:        result.Level,
 		LevelDisplay: result.LevelDisplay,
 		Dewpoint:     math.Round(dewpointF*10) / 10,
-		Temperature:  tempF,
+		Temperature:  &tempF,
 		Descriptor:   result.Descriptor,
 		Description:  result.Description,
 		Location: Location{

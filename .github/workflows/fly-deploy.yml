@@ -16,7 +16,20 @@ jobs:
           go-version-file: go.mod
       - run: go vet ./...
       - run: go build ./...
-      - run: go test -race ./...
+      - run: go test -race -coverprofile=coverage.out ./...
+      - name: Check test coverage threshold
+        run: |
+          # Filter coverage to internal/ packages only
+          head -1 coverage.out > coverage-internal.out
+          grep '^juicecon-golang/internal/' coverage.out >> coverage-internal.out
+          COVERAGE=$(go tool cover -func=coverage-internal.out | grep total | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Coverage for internal/ packages: ${COVERAGE}%"
+          THRESHOLD=80
+          if [ "$(echo "$COVERAGE < $THRESHOLD" | bc)" -eq 1 ]; then
+            echo "FAIL: Coverage ${COVERAGE}% is below the ${THRESHOLD}% threshold"
+            exit 1
+          fi
+          echo "PASS: Coverage ${COVERAGE}% meets the ${THRESHOLD}% threshold"
 
   deploy:
     name: Deploy app

@@ -6,7 +6,7 @@ import "time"
 type Observation struct {
 	DewpointC    float64
 	DewpointF    float64
-	TemperatureF float64
+	TemperatureF *float64
 	Timestamp    time.Time
 	Station      string
 	City         string

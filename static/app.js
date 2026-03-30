@@ -176,7 +176,7 @@
 
         // Update data panel
         protocolEl.textContent = systemNames[system] || 'DEWCON';
-        temperatureEl.textContent = data.temperature ? data.temperature.toFixed(1) + '\u00B0F' : '--\u00B0F';
+        temperatureEl.textContent = data.temperature != null ? data.temperature.toFixed(1) + '\u00B0F' : 'N/A';
         dewpointEl.textContent = data.dewpoint.toFixed(1) + '\u00B0F';
         locationEl.textContent = data.location.city + ', ' + data.location.state;
         stationEl.textContent = data.location.station;

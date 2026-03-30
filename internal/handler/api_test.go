@@ -21,6 +21,10 @@ func (m *mockWeatherClient) GetObservation(_ context.Context, _, _ float64) (*we
 	return m.observation, m.err
 }
 
+func floatPtr(v float64) *float64 {
+	return &v
+}
+
 func TestTestModeDewpoint71(t *testing.T) {
 	h := New()
 	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?dewpoint=71", nil)
@@ -206,7 +210,7 @@ func TestValidZIPWithMockClient(t *testing.T) {
 		observation: &weather.Observation{
 			DewpointC:    21.1,
 			DewpointF:    70.0,
-			TemperatureF: 85.0,
+			TemperatureF: floatPtr(85.0),
 			Timestamp:    time.Date(2026, 7, 15, 14, 0, 0, 0, time.UTC),
 			Station:      "KJFK",
 			City:         "New York",
@@ -241,8 +245,8 @@ func TestValidZIPWithMockClient(t *testing.T) {
 	if resp.Dewpoint != 70.0 {
 		t.Errorf("expected dewpoint 70.0, got %f", resp.Dewpoint)
 	}
-	if resp.Temperature != 85.0 {
-		t.Errorf("expected temperature 85.0, got %f", resp.Temperature)
+	if resp.Temperature == nil || *resp.Temperature != 85.0 {
+		t.Errorf("expected temperature 85.0, got %v", resp.Temperature)
 	}
 	if resp.Location.City != "New York" {
 		t.Errorf("expected city New York, got %q", resp.Location.City)
