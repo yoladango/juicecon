@@ -9,11 +9,11 @@
 
     /* CCF colors (dryness - cool blues/purples) */
     --ccf-clear: #22c55e;
-    --ccf-1: #7dd3fc;
-    --ccf-2: #38bdf8;
+    --ccf-1: #c084fc;
+    --ccf-2: #8b5cf6;
     --ccf-3: #6366f1;
-    --ccf-4: #8b5cf6;
-    --ccf-5: #c084fc;
+    --ccf-4: #38bdf8;
+    --ccf-5: #7dd3fc;
 
     --bg-dark: #0a0a0a;
     --bg-panel: #141414;
@@ -448,8 +448,8 @@ body {
     animation: pulse 2s ease-in-out infinite;
 }
 
-/* CCF5 crackle animation (worst dryness) */
-[data-system="ccf"][data-level="5"] .level-number {
+/* CCF1 crackle animation (worst dryness) */
+[data-system="ccf"][data-level="1"] .level-number {
     animation: crackle 0.15s ease-in-out infinite;
 }
 
