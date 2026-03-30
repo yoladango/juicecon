@@ -73,23 +73,40 @@ func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observa
 		return nil, fmt.Errorf("no observation stations found")
 	}
 
-	stationID := stations.Features[0].Properties.StationIdentifier
-
-	// Step 3: Get the latest observation from the nearest station
-	obsURL := fmt.Sprintf("%s/stations/%s/observations/latest", nwsBaseURL, stationID)
-	obsResp, err := c.makeRequest(ctx, obsURL)
-	if err != nil {
-		return nil, fmt.Errorf("observation lookup failed: %w", err)
-	}
-	defer obsResp.Body.Close()
-
+	// Step 3: Try stations in order until one returns a valid observation
 	var obs NWSObservationResponse
-	if err := json.NewDecoder(obsResp.Body).Decode(&obs); err != nil {
-		return nil, fmt.Errorf("failed to decode observation response: %w", err)
+	var stationID string
+	maxStations := 5
+	if len(stations.Features) < maxStations {
+		maxStations = len(stations.Features)
 	}
 
-	if obs.Properties.Dewpoint.Value == nil {
-		return nil, fmt.Errorf("dewpoint data not available")
+	var lastErr error
+	for i := 0; i < maxStations; i++ {
+		stationID = stations.Features[i].Properties.StationIdentifier
+		obsURL := fmt.Sprintf("%s/stations/%s/observations/latest", nwsBaseURL, stationID)
+		obsResp, err := c.makeRequest(ctx, obsURL)
+		if err != nil {
+			lastErr = err
+			continue
+		}
+
+		if err := json.NewDecoder(obsResp.Body).Decode(&obs); err != nil {
+			obsResp.Body.Close()
+			lastErr = err
+			continue
+		}
+		obsResp.Body.Close()
+
+		if obs.Properties.Dewpoint.Value != nil {
+			lastErr = nil
+			break
+		}
+		lastErr = fmt.Errorf("dewpoint data not available from station %s", stationID)
+	}
+
+	if lastErr != nil {
+		return nil, fmt.Errorf("observation lookup failed: %w", lastErr)
 	}
 
 	dewpointC := *obs.Properties.Dewpoint.Value
