@@ -3,7 +3,7 @@ package ccf
 import "strconv"
 
 // Level represents a CCF severity level
-// Note: CCF goes UP in severity by number as dewpoint goes DOWN
+// Note: Like DEFCON/JUICECON, lower numbers = higher severity
 type Level struct {
 	Level       *int   `json:"level"`
 	Descriptor  string `json:"descriptor"`
@@ -16,14 +16,14 @@ func Calculate(dewpointF float64) Level {
 	switch {
 	case dewpointF <= 2:
 		return Level{
-			Level:       intPtr(5),
+			Level:       intPtr(1),
 			Descriptor:  "Walking EMP",
 			Description: "I am a walking EMP. Strong aversion to touching doorknobs. Hair is snakes!",
 			AllClear:    false,
 		}
 	case dewpointF <= 8:
 		return Level{
-			Level:       intPtr(4),
+			Level:       intPtr(2),
 			Descriptor:  "Husk Hands",
 			Description: "Hands are husks of their former selves.",
 			AllClear:    false,
@@ -37,14 +37,14 @@ func Calculate(dewpointF float64) Level {
 		}
 	case dewpointF <= 19:
 		return Level{
-			Level:       intPtr(2),
+			Level:       intPtr(4),
 			Descriptor:  "Humidifier Check",
 			Description: "Do we even have a working humidifier?",
 			AllClear:    false,
 		}
 	case dewpointF <= 25:
 		return Level{
-			Level:       intPtr(1),
+			Level:       intPtr(5),
 			Descriptor:  "Cotton Mouth",
 			Description: "Cotton mouth but no alcohol? Hmmmm. Saline nasal rinse under consideration.",
 			AllClear:    false,
