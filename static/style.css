@@ -20,7 +20,7 @@
     --bg-elevated: #1a1a1a;
     --text-primary: #fafafa;
     --text-secondary: #a1a1aa;
-    --text-dim: #52525b;
+    --text-dim: #9ca3af;
     --border-color: #27272a;
 
     --level-color: var(--jc-clear);
@@ -464,6 +464,39 @@ body {
     50% { text-shadow: 0 0 40px var(--level-color); }
     75% { text-shadow: 0 0 90px var(--level-color), -1px 1px 0px #e0e7ff; }
     100% { text-shadow: 0 0 60px var(--level-color); }
+}
+
+/* Auto-refresh indicator */
+.refresh-status {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-top: 12px;
+}
+
+.refresh-status-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-dim);
+    margin-right: 6px;
+    vertical-align: middle;
+    animation: dot-pulse 3s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+/* Focus styles for accessibility */
+.btn:focus-visible,
+.info-btn:focus-visible,
+.input:focus-visible {
+    outline: 2px solid var(--level-color);
+    outline-offset: 2px;
 }
 
 /* Responsive */

@@ -1,6 +1,10 @@
 package juicecon
 
-import "testing"
+import (
+	"testing"
+
+	"juicecon-golang/internal/ptr"
+)
 
 func TestCalculate(t *testing.T) {
 	tests := []struct {
@@ -12,26 +16,26 @@ func TestCalculate(t *testing.T) {
 		wantAllClr  bool
 	}{
 		// JC1: >= 75
-		{"JC1 at boundary 75.0", 75.0, intPtr(1), "The Ultimate", "A very rare event. This is not a drill.", false},
-		{"JC1 extreme high 100.0", 100.0, intPtr(1), "The Ultimate", "A very rare event. This is not a drill.", false},
-		{"JC1 extreme high 150.0", 150.0, intPtr(1), "The Ultimate", "A very rare event. This is not a drill.", false},
+		{"JC1 at boundary 75.0", 75.0, ptr.Int(1), "The Ultimate", "A very rare event. This is not a drill.", false},
+		{"JC1 extreme high 100.0", 100.0, ptr.Int(1), "The Ultimate", "A very rare event. This is not a drill.", false},
+		{"JC1 extreme high 150.0", 150.0, ptr.Int(1), "The Ultimate", "A very rare event. This is not a drill.", false},
 
 		// JC2: 73-74.9
-		{"JC2 at boundary 73.0", 73.0, intPtr(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
-		{"JC2 at 74.9", 74.9, intPtr(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
-		{"JC2 at 74.99", 74.99, intPtr(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
+		{"JC2 at boundary 73.0", 73.0, ptr.Int(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
+		{"JC2 at 74.9", 74.9, ptr.Int(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
+		{"JC2 at 74.99", 74.99, ptr.Int(2), "Come The Fuck On", "Unacceptable. File complaints with the atmosphere.", false},
 
 		// JC3: 70-72.9
-		{"JC3 at boundary 70.0", 70.0, intPtr(3), "Unbearable", "The air has weight. You are breathing soup.", false},
-		{"JC3 at 72.9", 72.9, intPtr(3), "Unbearable", "The air has weight. You are breathing soup.", false},
+		{"JC3 at boundary 70.0", 70.0, ptr.Int(3), "Unbearable", "The air has weight. You are breathing soup.", false},
+		{"JC3 at 72.9", 72.9, ptr.Int(3), "Unbearable", "The air has weight. You are breathing soup.", false},
 
 		// JC4: 65-69.9
-		{"JC4 at boundary 65.0", 65.0, intPtr(4), "Miserable", "Existence is damp. Consider relocation.", false},
-		{"JC4 at 69.9", 69.9, intPtr(4), "Miserable", "Existence is damp. Consider relocation.", false},
+		{"JC4 at boundary 65.0", 65.0, ptr.Int(4), "Miserable", "Existence is damp. Consider relocation.", false},
+		{"JC4 at 69.9", 69.9, ptr.Int(4), "Miserable", "Existence is damp. Consider relocation.", false},
 
 		// JC5: 60-64.9
-		{"JC5 at boundary 60.0", 60.0, intPtr(5), "Noticeable", "A/C at night is now justified.", false},
-		{"JC5 at 64.9", 64.9, intPtr(5), "Noticeable", "A/C at night is now justified.", false},
+		{"JC5 at boundary 60.0", 60.0, ptr.Int(5), "Noticeable", "A/C at night is now justified.", false},
+		{"JC5 at 64.9", 64.9, ptr.Int(5), "Noticeable", "A/C at night is now justified.", false},
 
 		// ALL CLEAR: < 60
 		{"ALL CLEAR just below 59.9", 59.9, nil, "Comfortable", "JUICECON protocols not currently active.", true},
@@ -82,11 +86,11 @@ func TestLevelDisplay(t *testing.T) {
 		level   Level
 		want    string
 	}{
-		{"JC1 display", Level{Level: intPtr(1), AllClear: false}, "JUICECON 1"},
-		{"JC2 display", Level{Level: intPtr(2), AllClear: false}, "JUICECON 2"},
-		{"JC3 display", Level{Level: intPtr(3), AllClear: false}, "JUICECON 3"},
-		{"JC4 display", Level{Level: intPtr(4), AllClear: false}, "JUICECON 4"},
-		{"JC5 display", Level{Level: intPtr(5), AllClear: false}, "JUICECON 5"},
+		{"JC1 display", Level{Level: ptr.Int(1), AllClear: false}, "JUICECON 1"},
+		{"JC2 display", Level{Level: ptr.Int(2), AllClear: false}, "JUICECON 2"},
+		{"JC3 display", Level{Level: ptr.Int(3), AllClear: false}, "JUICECON 3"},
+		{"JC4 display", Level{Level: ptr.Int(4), AllClear: false}, "JUICECON 4"},
+		{"JC5 display", Level{Level: ptr.Int(5), AllClear: false}, "JUICECON 5"},
 		{"ALL CLEAR display", Level{Level: nil, AllClear: true}, "ALL CLEAR"},
 	}
 

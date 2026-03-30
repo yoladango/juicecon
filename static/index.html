@@ -19,14 +19,14 @@
                 <div class="loading-bar"><div class="loading-bar-fill"></div></div>
             </div>
 
-            <div id="error" class="error hidden">
-                <div class="error-icon">!</div>
+            <div id="error" class="error hidden" role="alert" aria-live="assertive">
+                <div class="error-icon" aria-hidden="true">!</div>
                 <div class="error-title">SYSTEM ERROR</div>
                 <div id="error-message" class="error-message"></div>
                 <button id="retry-btn" class="btn">RETRY</button>
             </div>
 
-            <div id="display" class="display hidden">
+            <div id="display" class="display hidden" aria-live="polite" role="status">
                 <div class="level-container">
                     <div class="level-label">CURRENT THREAT LEVEL</div>
                     <div id="level-number" class="level-number">3</div>
@@ -67,11 +67,16 @@
                     <button id="refresh-btn" class="btn">REFRESH DATA</button>
                     <button id="location-btn" class="btn btn-secondary">CHANGE LOCATION</button>
                 </div>
+
+                <div id="refresh-status" class="refresh-status" aria-live="polite">
+                    <span class="refresh-status-dot" aria-hidden="true"></span>
+                    <span id="refresh-status-text">AUTO-REFRESH ACTIVE</span>
+                </div>
             </div>
 
-            <div id="location-modal" class="modal hidden">
+            <div id="location-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
                 <div class="modal-content">
-                    <div class="modal-header">MANUAL LOCATION ENTRY</div>
+                    <div id="location-modal-title" class="modal-header">MANUAL LOCATION ENTRY</div>
                     <div class="modal-body">
                         <label for="zip-input" class="input-label">US ZIP CODE</label>
                         <input type="text" id="zip-input" class="input" placeholder="45678" maxlength="5" pattern="[0-9]{5}">
@@ -85,9 +90,9 @@
             </div>
         </main>
 
-            <div id="info-modal" class="modal hidden">
+            <div id="info-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
                 <div class="modal-content info-modal-content">
-                    <div class="modal-header">PROTOCOL INFORMATION</div>
+                    <div id="info-modal-title" class="modal-header">PROTOCOL INFORMATION</div>
                     <div class="modal-body info-body">
                         <div class="info-section">
                             <div class="info-title">DEWCON</div>

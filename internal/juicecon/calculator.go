@@ -1,6 +1,10 @@
 package juicecon
 
-import "strconv"
+import (
+	"strconv"
+
+	"juicecon-golang/internal/ptr"
+)
 
 // Level represents a JUICECON severity level
 type Level struct {
@@ -15,35 +19,35 @@ func Calculate(dewpointF float64) Level {
 	switch {
 	case dewpointF >= 75:
 		return Level{
-			Level:       intPtr(1),
+			Level:       ptr.Int(1),
 			Descriptor:  "The Ultimate",
 			Description: "A very rare event. This is not a drill.",
 			AllClear:    false,
 		}
 	case dewpointF >= 73:
 		return Level{
-			Level:       intPtr(2),
+			Level:       ptr.Int(2),
 			Descriptor:  "Come The Fuck On",
 			Description: "Unacceptable. File complaints with the atmosphere.",
 			AllClear:    false,
 		}
 	case dewpointF >= 70:
 		return Level{
-			Level:       intPtr(3),
+			Level:       ptr.Int(3),
 			Descriptor:  "Unbearable",
 			Description: "The air has weight. You are breathing soup.",
 			AllClear:    false,
 		}
 	case dewpointF >= 65:
 		return Level{
-			Level:       intPtr(4),
+			Level:       ptr.Int(4),
 			Descriptor:  "Miserable",
 			Description: "Existence is damp. Consider relocation.",
 			AllClear:    false,
 		}
 	case dewpointF >= 60:
 		return Level{
-			Level:       intPtr(5),
+			Level:       ptr.Int(5),
 			Descriptor:  "Noticeable",
 			Description: "A/C at night is now justified.",
 			AllClear:    false,
@@ -64,8 +68,4 @@ func (l Level) LevelDisplay() string {
 		return "ALL CLEAR"
 	}
 	return "JUICECON " + strconv.Itoa(*l.Level)
-}
-
-func intPtr(i int) *int {
-	return &i
 }

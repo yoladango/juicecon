@@ -1,6 +1,10 @@
 package ccf
 
-import "strconv"
+import (
+	"strconv"
+
+	"juicecon-golang/internal/ptr"
+)
 
 // Level represents a CCF severity level
 // Note: Like DEFCON/JUICECON, lower numbers = higher severity
@@ -16,35 +20,35 @@ func Calculate(dewpointF float64) Level {
 	switch {
 	case dewpointF <= 2:
 		return Level{
-			Level:       intPtr(1),
+			Level:       ptr.Int(1),
 			Descriptor:  "Walking EMP",
 			Description: "I am a walking EMP. Strong aversion to touching doorknobs. Hair is snakes!",
 			AllClear:    false,
 		}
 	case dewpointF <= 8:
 		return Level{
-			Level:       intPtr(2),
+			Level:       ptr.Int(2),
 			Descriptor:  "Husk Hands",
 			Description: "Hands are husks of their former selves.",
 			AllClear:    false,
 		}
 	case dewpointF <= 14:
 		return Level{
-			Level:       intPtr(3),
+			Level:       ptr.Int(3),
 			Descriptor:  "Lotion Failure",
 			Description: "This lotion is NOT cutting it.",
 			AllClear:    false,
 		}
 	case dewpointF <= 19:
 		return Level{
-			Level:       intPtr(4),
+			Level:       ptr.Int(4),
 			Descriptor:  "Humidifier Check",
 			Description: "Do we even have a working humidifier?",
 			AllClear:    false,
 		}
 	case dewpointF <= 25:
 		return Level{
-			Level:       intPtr(5),
+			Level:       ptr.Int(5),
 			Descriptor:  "Cotton Mouth",
 			Description: "Cotton mouth but no alcohol? Hmmmm. Saline nasal rinse under consideration.",
 			AllClear:    false,
@@ -65,8 +69,4 @@ func (l Level) LevelDisplay() string {
 		return "ALL CLEAR"
 	}
 	return "CCF " + strconv.Itoa(*l.Level)
-}
-
-func intPtr(i int) *int {
-	return &i
 }

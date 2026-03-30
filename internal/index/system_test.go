@@ -1,10 +1,10 @@
 package index
 
-import "testing"
+import (
+	"testing"
 
-func intPtr(i int) *int {
-	return &i
-}
+	"juicecon-golang/internal/ptr"
+)
 
 func TestEvaluate(t *testing.T) {
 	tests := []struct {
@@ -26,7 +26,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        60.0,
 			wantActiveSystem: SystemJuiceCon,
 			wantSystemName:   "JUICECON",
-			wantLevel:        intPtr(5),
+			wantLevel:        ptr.Int(5),
 			wantLevelDisplay: "JUICECON 5",
 			wantDescriptor:   "Noticeable",
 			wantDescription:  "A/C at night is now justified.",
@@ -38,7 +38,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        75.0,
 			wantActiveSystem: SystemJuiceCon,
 			wantSystemName:   "JUICECON",
-			wantLevel:        intPtr(1),
+			wantLevel:        ptr.Int(1),
 			wantLevelDisplay: "JUICECON 1",
 			wantDescriptor:   "The Ultimate",
 			wantDescription:  "A very rare event. This is not a drill.",
@@ -53,7 +53,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        25.0,
 			wantActiveSystem: SystemCCF,
 			wantSystemName:   "CCF",
-			wantLevel:        intPtr(5),
+			wantLevel:        ptr.Int(5),
 			wantLevelDisplay: "CCF 5",
 			wantDescriptor:   "Cotton Mouth",
 			wantDescription:  "Cotton mouth but no alcohol? Hmmmm. Saline nasal rinse under consideration.",
@@ -65,7 +65,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        2.0,
 			wantActiveSystem: SystemCCF,
 			wantSystemName:   "CCF",
-			wantLevel:        intPtr(1),
+			wantLevel:        ptr.Int(1),
 			wantLevelDisplay: "CCF 1",
 			wantDescriptor:   "Walking EMP",
 			wantDescription:  "I am a walking EMP. Strong aversion to touching doorknobs. Hair is snakes!",
@@ -77,7 +77,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        -10.0,
 			wantActiveSystem: SystemCCF,
 			wantSystemName:   "CCF",
-			wantLevel:        intPtr(1),
+			wantLevel:        ptr.Int(1),
 			wantLevelDisplay: "CCF 1",
 			wantDescriptor:   "Walking EMP",
 			wantDescription:  "I am a walking EMP. Strong aversion to touching doorknobs. Hair is snakes!",
@@ -139,7 +139,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        25.0,
 			wantActiveSystem: SystemCCF,
 			wantSystemName:   "CCF",
-			wantLevel:        intPtr(5),
+			wantLevel:        ptr.Int(5),
 			wantLevelDisplay: "CCF 5",
 			wantDescriptor:   "Cotton Mouth",
 			wantDescription:  "Cotton mouth but no alcohol? Hmmmm. Saline nasal rinse under consideration.",
@@ -173,7 +173,7 @@ func TestEvaluate(t *testing.T) {
 			dewpointF:        60.0,
 			wantActiveSystem: SystemJuiceCon,
 			wantSystemName:   "JUICECON",
-			wantLevel:        intPtr(5),
+			wantLevel:        ptr.Int(5),
 			wantLevelDisplay: "JUICECON 5",
 			wantDescriptor:   "Noticeable",
 			wantDescription:  "A/C at night is now justified.",
