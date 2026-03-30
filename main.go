@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"encoding/json"
 	"fmt"
@@ -8,9 +9,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"juicecon-golang/internal/handler"
+	"juicecon-golang/internal/middleware"
 )
 
 var startTime time.Time
@@ -43,25 +47,16 @@ func main() {
 	// Health check
 	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{
+		if err := json.NewEncoder(w).Encode(map[string]string{
 			"status": "ok",
 			"uptime": fmt.Sprintf("%s", time.Since(startTime).Round(time.Second)),
-		})
+		}); err != nil {
+			log.Printf("healthz: failed to write response: %v", err)
+		}
 	})
 
 	// Serve static files
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
-
-	// Test panel
-	mux.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
-		data, err := staticFiles.ReadFile("static/test.html")
-		if err != nil {
-			http.Error(w, "Not found", http.StatusNotFound)
-			return
-		}
-		w.Header().Set("Content-Type", "text/html")
-		w.Write(data)
-	})
 
 	// Root serves index.html
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -75,9 +70,43 @@ func main() {
 			return
 		}
 		w.Header().Set("Content-Type", "text/html")
-		w.Write(data)
+		if _, err := w.Write(data); err != nil {
+			log.Printf("root: failed to write response: %v", err)
+		}
 	})
 
+	// Rate limiter: 60 requests per minute, cleanup every 5 minutes.
+	// Only applied to /api/ routes.
+	rateLimiter := middleware.NewRateLimiter(60, time.Minute, 5*time.Minute)
+	defer rateLimiter.Stop()
+
+	// Apply middleware: security headers on all routes, rate limiting on /api/
+	wrapped := middleware.SecurityHeaders(rateLimiter.Wrap("/api/", mux))
+
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: wrapped,
+	}
+
+	// Listen for shutdown signals in a separate goroutine.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-quit
+		log.Printf("Received signal %v, shutting down...", sig)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		if err := srv.Shutdown(ctx); err != nil {
+			log.Printf("Graceful shutdown failed: %v", err)
+		}
+	}()
+
 	log.Printf("DEWCON system starting on port %s", port)
-	log.Fatal(http.ListenAndServe(":"+port, mux))
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Server error: %v", err)
+	}
+	log.Println("Server stopped")
 }

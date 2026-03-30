@@ -15,9 +15,13 @@ FROM alpine:latest
 
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+RUN adduser -D -u 1001 appuser
+
+WORKDIR /app
 
 COPY --from=builder /app/juicecon .
+
+USER appuser
 
 EXPOSE 8080
 

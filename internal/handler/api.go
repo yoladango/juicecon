@@ -3,8 +3,11 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"math"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
 
@@ -12,6 +15,8 @@ import (
 	"juicecon-golang/internal/index"
 	"juicecon-golang/internal/weather"
 )
+
+var zipRegex = regexp.MustCompile(`^\d{5}$`)
 
 // Response represents the unified API response
 type Response struct {
@@ -91,7 +96,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	obs, err := h.weatherClient.GetObservation(r.Context(), lat, lon)
 	if err != nil {
-		h.writeError(w, http.StatusBadGateway, "Unable to fetch weather data: "+err.Error(), "WEATHER_API_ERROR")
+		log.Printf("weather API error for lat=%.4f lon=%.4f: %v", lat, lon, err)
+		h.writeError(w, http.StatusBadGateway, "Unable to retrieve weather data. Please try again.", "WEATHER_API_ERROR")
 		return
 	}
 
@@ -150,9 +156,12 @@ func (h *Handler) parseCoordinates(r *http.Request) (float64, float64, error) {
 
 	// Check for ZIP code first
 	if zip := query.Get("zip"); zip != "" {
+		if !zipRegex.MatchString(zip) {
+			return 0, 0, &paramError{"Invalid ZIP code: must be exactly 5 digits"}
+		}
 		coords, err := geo.LookupZIP(zip)
 		if err != nil {
-			return 0, 0, err
+			return 0, 0, &paramError{"ZIP code not found"}
 		}
 		return coords.Lat, coords.Lon, nil
 	}
@@ -169,10 +178,16 @@ func (h *Handler) parseCoordinates(r *http.Request) (float64, float64, error) {
 	if err != nil {
 		return 0, 0, &paramError{"Invalid latitude"}
 	}
+	if lat < -90 || lat > 90 {
+		return 0, 0, &paramError{fmt.Sprintf("Latitude must be between -90 and 90, got %.4f", lat)}
+	}
 
 	lon, err := strconv.ParseFloat(lonStr, 64)
 	if err != nil {
 		return 0, 0, &paramError{"Invalid longitude"}
+	}
+	if lon < -180 || lon > 180 {
+		return 0, 0, &paramError{fmt.Sprintf("Longitude must be between -180 and 180, got %.4f", lon)}
 	}
 
 	return lat, lon, nil

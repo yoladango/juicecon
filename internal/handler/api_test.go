@@ -3,8 +3,10 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -202,6 +204,188 @@ func TestInvalidDewpointParam(t *testing.T) {
 
 	if errResp.Code != "INVALID_PARAMS" {
 		t.Errorf("expected error code INVALID_PARAMS, got %q", errResp.Code)
+	}
+}
+
+func TestInvalidZIPFormat(t *testing.T) {
+	h := New()
+	tests := []struct {
+		name string
+		zip  string
+	}{
+		{"too short", "1234"},
+		{"too long", "123456"},
+		{"letters", "abcde"},
+		{"mixed", "123ab"},
+		{"special chars", "123-5"},
+		{"empty after key", ""},
+	}
+
+	for _, tt := range tests {
+		if tt.zip == "" {
+			// empty zip falls through to lat/lon check, not the zip validator
+			continue
+		}
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip="+tt.zip, nil)
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Fatalf("expected status 400 for zip=%q, got %d", tt.zip, rec.Code)
+			}
+
+			var errResp ErrorResponse
+			if err := json.NewDecoder(rec.Body).Decode(&errResp); err != nil {
+				t.Fatalf("failed to decode error response: %v", err)
+			}
+			if errResp.Code != "INVALID_PARAMS" {
+				t.Errorf("expected error code INVALID_PARAMS, got %q", errResp.Code)
+			}
+			if !strings.Contains(errResp.Error, "must be exactly 5 digits") {
+				t.Errorf("expected error about 5 digits, got %q", errResp.Error)
+			}
+		})
+	}
+}
+
+func TestLatitudeOutOfRange(t *testing.T) {
+	h := New()
+	tests := []struct {
+		name string
+		lat  string
+	}{
+		{"too high", "91"},
+		{"too low", "-91"},
+		{"way too high", "180"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat="+tt.lat+"&lon=-87.6298", nil)
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Fatalf("expected status 400, got %d", rec.Code)
+			}
+
+			var errResp ErrorResponse
+			if err := json.NewDecoder(rec.Body).Decode(&errResp); err != nil {
+				t.Fatalf("failed to decode error response: %v", err)
+			}
+			if errResp.Code != "INVALID_PARAMS" {
+				t.Errorf("expected error code INVALID_PARAMS, got %q", errResp.Code)
+			}
+			if !strings.Contains(errResp.Error, "Latitude must be between") {
+				t.Errorf("expected latitude range error, got %q", errResp.Error)
+			}
+		})
+	}
+}
+
+func TestLongitudeOutOfRange(t *testing.T) {
+	h := New()
+	tests := []struct {
+		name string
+		lon  string
+	}{
+		{"too high", "181"},
+		{"too low", "-181"},
+		{"way too high", "360"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat=41.8781&lon="+tt.lon, nil)
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusBadRequest {
+				t.Fatalf("expected status 400, got %d", rec.Code)
+			}
+
+			var errResp ErrorResponse
+			if err := json.NewDecoder(rec.Body).Decode(&errResp); err != nil {
+				t.Fatalf("failed to decode error response: %v", err)
+			}
+			if errResp.Code != "INVALID_PARAMS" {
+				t.Errorf("expected error code INVALID_PARAMS, got %q", errResp.Code)
+			}
+			if !strings.Contains(errResp.Error, "Longitude must be between") {
+				t.Errorf("expected longitude range error, got %q", errResp.Error)
+			}
+		})
+	}
+}
+
+func TestWeatherAPIErrorSanitized(t *testing.T) {
+	mock := &mockWeatherClient{
+		err: errors.New("GET https://api.weather.gov/points/41.8781,-87.6298: 500 Internal Server Error"),
+	}
+	h := NewWithClient(mock)
+
+	req := httptest.NewRequest(http.MethodGet, "/api/juicecon?zip=10001", nil)
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadGateway {
+		t.Fatalf("expected status 502, got %d", rec.Code)
+	}
+
+	var errResp ErrorResponse
+	if err := json.NewDecoder(rec.Body).Decode(&errResp); err != nil {
+		t.Fatalf("failed to decode error response: %v", err)
+	}
+	if errResp.Code != "WEATHER_API_ERROR" {
+		t.Errorf("expected error code WEATHER_API_ERROR, got %q", errResp.Code)
+	}
+	// Must NOT contain the internal URL
+	if strings.Contains(errResp.Error, "api.weather.gov") {
+		t.Errorf("error message should not contain internal URLs, got %q", errResp.Error)
+	}
+	// Must contain the generic message
+	if errResp.Error != "Unable to retrieve weather data. Please try again." {
+		t.Errorf("expected generic error message, got %q", errResp.Error)
+	}
+}
+
+func TestValidLatLonBoundaries(t *testing.T) {
+	mock := &mockWeatherClient{
+		observation: &weather.Observation{
+			DewpointC:    21.1,
+			DewpointF:    70.0,
+			TemperatureF: floatPtr(85.0),
+			Timestamp:    time.Date(2026, 7, 15, 14, 0, 0, 0, time.UTC),
+			Station:      "KTEST",
+			City:         "Boundary",
+			State:        "TS",
+		},
+	}
+	h := NewWithClient(mock)
+
+	tests := []struct {
+		name string
+		lat  string
+		lon  string
+	}{
+		{"max lat", "90", "0"},
+		{"min lat", "-90", "0"},
+		{"max lon", "0", "180"},
+		{"min lon", "0", "-180"},
+		{"zeros", "0", "0"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, "/api/juicecon?lat="+tt.lat+"&lon="+tt.lon, nil)
+			rec := httptest.NewRecorder()
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != http.StatusOK {
+				t.Fatalf("expected status 200 for lat=%s lon=%s, got %d", tt.lat, tt.lon, rec.Code)
+			}
+		})
 	}
 }
 
