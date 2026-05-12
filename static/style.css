@@ -1,14 +1,16 @@
 /* ============================================================
    DEWCON :: Atmospheric Threat Command
-   Industrial weather-station chassis. Mobile-first.
+   Soviet-steppes weather outpost chassis. Mobile-first.
    Dark only. WCAG AA. 44px tap targets.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Major+Mono+Display&family=JetBrains+Mono:wght@200;300;400;500;700&family=Stardos+Stencil:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Stalinist+One&family=Black+Ops+One&family=JetBrains+Mono:wght@300;500;700&display=swap');
 
 :root {
     /* --------------------------------------------------------
-       Severity palette (preserved — app.js depends on it)
+       Severity ramps (production values preserved — app.js
+       depends on these names; --level-color routes one of them
+       below).
        -------------------------------------------------------- */
     --jc-clear: #5fb574;
     --jc-5: #f3d886;
@@ -24,57 +26,87 @@
     --ccf-4: #76b3df;
     --ccf-5: #a4d0ec;
 
+    /* Severity-text companion ramp. Deeper variants for body-size
+       text that needs to land at ≥5.3:1 on --bg-panel #1a1f1a.
+       Routed alongside --level-color below. */
+    --jc-clear-text: #7fc88e;
+    --jc-5-text:     #f3d886;
+    --jc-4-text:     #efa85a;
+    --jc-3-text:     #f08f5c;
+    --jc-2-text:     #e87a5e;
+    --jc-1-text:     #de5d4f;
+
+    --ccf-clear-text: #7fc88e;
+    --ccf-1-text:     #7aa8d8;
+    --ccf-2-text:     #8cb6df;
+    --ccf-3-text:     #a3c6e6;
+    --ccf-4-text:     #bcd5ec;
+    --ccf-5-text:     #d0e2f2;
+
+    /* Severity-rgb companion ramp. Used for rgba() plates and
+       glows (Safari's color-mix support isn't dependable). */
+    --jc-clear-rgb: 95, 181, 116;
+    --jc-5-rgb:     243, 216, 134;
+    --jc-4-rgb:     239, 168, 90;
+    --jc-3-rgb:     232, 120, 56;
+    --jc-2-rgb:     211, 74, 40;
+    --jc-1-rgb:     180, 26, 26;
+
+    --ccf-clear-rgb: 95, 181, 116;
+    --ccf-1-rgb:     31, 93, 158;
+    --ccf-2-rgb:     48, 121, 185;
+    --ccf-3-rgb:     77, 151, 208;
+    --ccf-4-rgb:     118, 179, 223;
+    --ccf-5-rgb:     164, 208, 236;
+
     /* --------------------------------------------------------
-       Industrial chassis surfaces — slightly warmer blacks,
-       steel/iron tints, oxidized concrete.
+       Surfaces — concrete-bunker chassis, olive shadow tones.
        -------------------------------------------------------- */
-    --bg-base:     #07090b;       /* deep iron (under sky) */
-    --bg-panel:    #232930;       /* aluminum face */
-    --bg-elevated: #2c333b;       /* upper highlight */
-    --bg-deep:     #11161c;       /* recessed shadow */
+    --bg-base:     #07090b;     /* outer steppes / iron, below sky */
+    --bg-panel:    #1a1f1a;     /* panel face, olive shadow with green cast */
+    --bg-elevated: #262c25;     /* panel top highlight */
+    --bg-deep:     #0f1310;     /* recessed shadow / inputs */
+    --bg-trough:   #0c0f0c;     /* below-panel band */
 
-    /* Aluminum tones (corroded bunker chassis) */
-    --al-hi:    #424a55;
-    --al-mid:   #2b3138;
-    --al-lo:    #15191e;
-    --al-scuff: rgba(255,255,255,0.04);
+    /* Olive / khaki / metal palette */
+    --khaki-hi:  #b8bb95;       /* 7.5:1 — body OK */
+    --khaki-mid: #7a7d63;       /* 3.6:1 — borders/dividers only */
+    --khaki-lo:  #3e4234;       /* texture only */
+    --rebar:     #4a4d3d;       /* 1px decorative rules */
 
-    /* Oxidation / patina */
-    --patina-1: #2f5b54;
-    --patina-2: #467a72;
-    --patina-3: #6fa39c;
-
-    /* Rust */
-    --rust-deep:  #5e2a14;
-    --rust-mid:   #8a3a14;
-    --rust-light: #b1572c;
-
-    /* Borders / structure (heavier than v1) */
-    --border-frame:  rgba(190, 205, 220, 0.22);
-    --border-soft:   rgba(190, 205, 220, 0.10);
-    --border-bright: rgba(225, 238, 250, 0.55);
-    --border-rule:   rgba(225, 238, 250, 0.35);
+    /* Copper / oxide / rust */
+    --copper:       #c98a4d;    /* 5.5:1 — body OK, focus, asset tags */
+    --copper-deep:  #7d4a25;    /* 1.8:1 — decoration only, never text */
+    --oxblood:      #b7402e;    /* 3.7:1 — large display only */
+    --oxblood-text: #d96651;    /* 5.4:1 — body warm-red OK */
+    --stamp-ink:    #c14a32;    /* 4.4:1 — stamps (≥18px / ≥14px bold) */
+    --verdigris:    #48766b;    /* patina streak only, never text */
 
     /* Text */
-    --text-primary:   #eef3f9;
-    --text-secondary: #9aa7b6;
-    --text-dim:       #5d6a78;
-    --text-faint:     #313a45;
+    --text-primary:   #eef0e4;  /* 15.4:1 */
+    --text-secondary: #b8b3a0;  /* 7.9:1 */
+    --text-dim:       #9a9684;  /* 5.5:1 — micro labels */
+    --text-faint:     #5d5a4d;  /* decorative tick marks only, no text */
 
-    /* Hazard accents (industrial signage) */
-    --hazard-yellow: #f2c40b;
-    --hazard-black:  #0a0c10;
-    --rust:          #8a3a14;
-    --bolt:          #2b3239;
-    --bolt-hi:       #4a545f;
+    /* Routing tokens */
+    --focus-ring:    #c89456;
+    --border-frame:  rgba(184, 187, 149, 0.22);
+    --border-soft:   rgba(184, 187, 149, 0.10);
+    --border-bright: rgba(232, 228, 210, 0.45);
+    --border-rule:   rgba(232, 228, 210, 0.35);
 
-    /* Typography */
-    --font-display: 'Major Mono Display', 'IBM Plex Mono', 'Menlo', monospace;
-    --font-stencil: 'Stardos Stencil', 'Major Mono Display', 'Menlo', monospace;
+    /* Typography — Soviet bunker outpost.
+       Crossover rule: ≥40px Stalinist One, <40px Black Ops One. */
+    --font-display: 'Stalinist One', 'Black Ops One', 'Impact', sans-serif;
+    --font-stencil: 'Black Ops One', 'Stalinist One', 'Impact', sans-serif;
     --font-body:    'JetBrains Mono', 'IBM Plex Mono', 'SF Mono', 'Menlo', monospace;
 
-    /* Severity color routing (rebound below) */
+    /* Severity color routing (rebound by data-system + data-level
+       blocks below). The companion -text and -rgb properties stay
+       in sync. */
     --level-color: var(--jc-clear);
+    --level-color-text: var(--jc-clear-text);
+    --level-color-rgb: var(--jc-clear-rgb);
 
     /* Mobile-first frame metrics. Scale up at breakpoints. */
     --frame-pad-x: 12px;
@@ -82,8 +114,10 @@
     --panel-pad:   18px;
     --gap-panels:  16px;
 
-    /* Texture noise (data URI, ~1KB) */
+    /* Texture noise — fine grain (existing) + coarse aggregate (new) */
     --noise: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.9  0 0 0 0 0.95  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    --noise-fine: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.9  0 0 0 0 0.95  0 0 0 0 1  0 0 0 0.55 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    --noise-coarse: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.18' numOctaves='1' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.55  0 0 0 0 0.5  0 0 0 0.4 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 /* ============================================================
@@ -214,81 +248,125 @@ body::after {
 .reticle-bl    { bottom: 8px;  left: 8px;     border-bottom-width: 2px; border-left-width: 2px; }
 
 /* ============================================================
-   Classification bars — hazard-stripe top/bottom
+   Classification bars — Mimeograph Header Band.
+   Olive paper ribbon glued to concrete: olive ground, thin
+   khaki rules above and below, repeating Latin run.
    ============================================================ */
 
 .classification-bar {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 0;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    height: 22px;
     font-family: var(--font-body);
     font-size: 9px;
     letter-spacing: 2.5px;
     color: var(--text-secondary);
     text-transform: uppercase;
-    flex-wrap: wrap;
+    background: var(--bg-trough);
+    border-top: 1px solid var(--khaki-mid);
+    border-bottom: 1px solid var(--khaki-mid);
+    overflow: hidden;
+    position: relative;
 }
 
 .classification-bar--top    { margin-bottom: 14px; animation: dropIn 0.5s ease both; }
 .classification-bar--bottom { margin-top: 18px;    animation: dropIn 0.5s 0.8s ease both; }
 
-/* Hazard stripes — yellow + black diagonal, industrial signage */
+/* The two .classification-stripes per bar carry the repeating Latin
+   run; the centered .classification-text overlays in the middle
+   with a trough-colored padding strip so the text behind appears
+   cleanly cut. */
 .classification-stripes {
     flex: 1 1 60px;
-    min-width: 40px;
-    height: 10px;
-    background:
-        repeating-linear-gradient(
-            -45deg,
-            var(--hazard-yellow) 0,
-            var(--hazard-yellow) 8px,
-            var(--hazard-black) 8px,
-            var(--hazard-black) 16px
-        );
-    opacity: 0.78;
-    /* slight wear: subtle horizontal scratches */
-    box-shadow:
-        inset 0 1px 0 rgba(0,0,0,0.45),
-        inset 0 -1px 0 rgba(0,0,0,0.55);
+    min-width: 0;
     position: relative;
+    overflow: hidden;
+    align-self: stretch;
+    /* faint mimeograph paper grain */
+    background-image: var(--noise-fine);
+    background-size: 140px 140px;
+    background-blend-mode: overlay;
+    opacity: 0.95;
 }
+.classification-stripes::before {
+    content: "OUTPOST WX-04   ATMOSPHERIC TELEMETRY   FOR INTERNAL USE   OUTPOST WX-04   ATMOSPHERIC TELEMETRY   FOR INTERNAL USE   ";
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--khaki-mid);
+    white-space: nowrap;
+    padding: 0 12px;
+    pointer-events: none;
+    /* slight ink-on-damp-paper blur */
+    text-shadow: 0 0 0.4px rgba(0,0,0,0.35);
+}
+/* Bottom bar uses a different run */
+.classification-bar--bottom .classification-stripes::before {
+    content: "END TRANSMISSION   OUTPOST WX-04   STAND DOWN   END TRANSMISSION   OUTPOST WX-04   STAND DOWN   ";
+}
+
+/* Geiger sweep — single 40px highlight that crosses every 14s.
+   Disabled under prefers-reduced-motion. */
 .classification-stripes::after {
     content: '';
     position: absolute;
-    inset: 0;
-    background: var(--noise);
-    background-size: 120px 120px;
-    opacity: 0.22;
-    mix-blend-mode: multiply;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(232, 228, 210, 0.06) 50%,
+        transparent 100%
+    );
     pointer-events: none;
+    transform: translateX(-100%);
+    animation: geigerSweep 14s linear infinite;
 }
 
+@keyframes geigerSweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(calc(100vw + 80px)); }
+}
+
+/* Centered overlay carries the live timecode + pulse-dot. Sits
+   on top of the band, mask-cuts the underlying ribbon text. */
 .classification-text {
     display: inline-flex;
     align-items: center;
     gap: 8px;
     white-space: nowrap;
     flex: 0 0 auto;
-    padding: 2px 4px;
+    padding: 0 12px;
+    background: var(--bg-trough);
+    color: var(--text-secondary);
+    z-index: 1;
 }
 
-.classification-text .sep { color: var(--text-faint); }
+.classification-text .sep { color: var(--copper); }
 
+/* Period band uses a fixed copper sprocket-hole square (does NOT
+   track severity). */
 .classification-text .pulse-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--level-color);
-    box-shadow: 0 0 6px var(--level-color);
-    animation: livePulse 1.4s ease-in-out infinite;
-    transition: background 0.6s ease, box-shadow 0.6s ease;
+    width: 6px;
+    height: 6px;
+    border-radius: 0;
+    background: var(--copper);
+    box-shadow: 0 0 4px rgba(201, 138, 77, 0.45);
+    animation: livePulse 1.6s ease-in-out infinite;
     flex: 0 0 auto;
 }
 
 @keyframes livePulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50%      { opacity: 0.4; transform: scale(0.65); }
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
 }
 
 @keyframes dropIn {
@@ -318,6 +396,26 @@ body::after {
     animation: rise 0.6s 0.1s ease both;
 }
 
+/* Faded rubber stamp diagonally crossing behind the wordmark.
+   Multiply blend so it tints onto the chassis like real wet ink. */
+.header::before {
+    content: "CLASSIFIED // FOR INTERNAL USE";
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-7deg);
+    font-family: var(--font-display);
+    font-size: clamp(32px, 7vw, 48px);
+    letter-spacing: 0.12em;
+    color: var(--stamp-ink);
+    opacity: 0.18;
+    pointer-events: none;
+    mix-blend-mode: multiply;
+    white-space: nowrap;
+    z-index: 0;
+}
+.header > * { position: relative; z-index: 1; }
+
 .header-meta {
     display: flex;
     flex-direction: column;
@@ -343,7 +441,7 @@ body::after {
 }
 
 .header-meta-key {
-    color: var(--text-faint);
+    color: var(--text-dim);
     flex: 0 0 auto;
 }
 
@@ -357,10 +455,10 @@ body::after {
 }
 
 .title {
-    font-family: var(--font-stencil);
-    font-weight: 700;
-    font-size: clamp(44px, 14vw, 96px);
-    letter-spacing: 0.06em;
+    font-family: var(--font-display);
+    font-weight: 400; /* Stalinist One is single-weight */
+    font-size: clamp(44px, 12vw, 72px);
+    letter-spacing: 0.05em;
     line-height: 0.95;
     color: var(--text-primary);
     margin-bottom: 8px;
@@ -373,18 +471,18 @@ body::after {
     position: relative;
 }
 
-/* "PROPERTY OF" stamp behind the title at small angle */
+/* Asset-tag microline under the wordmark — sits below the title
+   and reads like the placard on equipment. */
 .title::after {
     content: 'PROPERTY · ATM.MOISTURE · UNIT 04';
     display: block;
     font-family: var(--font-body);
     font-weight: 500;
-    font-size: 8px;
+    font-size: 10px;
     letter-spacing: 3px;
-    color: var(--rust);
-    opacity: 0.75;
-    margin-top: 6px;
-    text-shadow: 0 1px 0 rgba(0,0,0,0.6);
+    color: var(--copper);
+    margin-top: 8px;
+    text-shadow: 0 1px 0 rgba(0,0,0,0.5);
 }
 
 .title-sub {
@@ -478,37 +576,38 @@ body::after {
 .error {
     text-align: center;
     padding: 40px 18px;
-    border: 2px solid var(--jc-3);
+    border: 2px solid var(--oxblood);
     background:
-        linear-gradient(180deg, rgba(232, 120, 56, 0.08), transparent),
+        linear-gradient(180deg, rgba(183, 64, 46, 0.10), transparent),
         var(--bg-panel);
     position: relative;
 }
 
 .error::before {
-    content: 'SYS::FAULT';
+    content: 'FAULT';
     position: absolute;
     top: -9px;
     left: 14px;
     background: var(--bg-base);
     padding: 0 8px;
     font-family: var(--font-stencil);
+    font-weight: 400;
     font-size: 10px;
     letter-spacing: 3px;
-    color: var(--jc-3);
+    color: var(--stamp-ink);
 }
 
 .error-icon {
     width: 56px;
     height: 56px;
-    border: 2px solid var(--jc-3);
+    border: 2px solid var(--oxblood);
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-stencil);
-    font-weight: 700;
+    font-weight: 400;
     font-size: 28px;
-    color: var(--jc-3);
+    color: var(--oxblood-text);
     margin: 0 auto 14px;
     transform: rotate(45deg);
     background: rgba(0,0,0,0.4);
@@ -517,10 +616,10 @@ body::after {
 
 .error-title {
     font-family: var(--font-stencil);
-    font-weight: 700;
+    font-weight: 400;
     font-size: 15px;
     letter-spacing: 3px;
-    color: var(--jc-3);
+    color: var(--oxblood-text);
     margin-bottom: 10px;
 }
 
@@ -544,87 +643,134 @@ body::after {
 }
 
 /* ============================================================
-   Panel — riveted steel plate
+   Panel — concrete bunker face.
+   L1-L8 background stack: rust smears, verdigris bloom + streak,
+   coarse aggregate, fine tooth, directional concrete pour,
+   base vertical gradient. No rivets, no backdrop-filter.
+   ::before = rebar line; ::after = two-stroke outer rule.
    ============================================================ */
 
 .panel {
     position: relative;
-    /* Corroded aluminum panel chassis. Layered backgrounds simulate:
-       1. paint chips (small irregular highlights/rust spots)
-       2. verdigris streak running down the right side
-       3. water-stain mark
-       4. plate noise (tooth)
-       5. main brushed aluminum gradient with top highlight */
     background:
-        radial-gradient(ellipse 24px 5px at 14% 18%, rgba(177, 87, 44, 0.20) 0%, transparent 70%),
-        radial-gradient(ellipse 6px 9px at 88% 38%, rgba(70, 122, 114, 0.28) 0%, transparent 70%),
-        radial-gradient(ellipse 14px 4px at 62% 86%, rgba(94, 42, 20, 0.18) 0%, transparent 70%),
-        linear-gradient(176deg, transparent 60%, rgba(70, 122, 114, 0.07) 78%, rgba(47, 91, 84, 0.10) 100%),
-        linear-gradient(90deg, transparent 88%, rgba(70, 122, 114, 0.08) 100%),
-        var(--noise),
+        /* L1 — rust smear, upper-left */
+        radial-gradient(ellipse 38px 9px at 13% 16%,
+            rgba(125, 74, 37, 0.32) 0%, transparent 72%),
+        /* L2 — rust smear, lower-right */
+        radial-gradient(ellipse 22px 7px at 84% 88%,
+            rgba(125, 74, 37, 0.22) 0%, transparent 75%),
+        /* L3 — verdigris bloom, mid-right */
+        radial-gradient(ellipse 18px 30px at 92% 44%,
+            rgba(72, 118, 107, 0.30) 0%, transparent 70%),
+        /* L4 — verdigris streak, vertical drip on the right edge */
         linear-gradient(180deg,
-            var(--al-hi) 0%,
-            var(--al-mid) 16%,
-            #1f242a 70%,
-            var(--al-lo) 100%);
+            transparent 0%,
+            rgba(72, 118, 107, 0.00) 12%,
+            rgba(72, 118, 107, 0.14) 28%,
+            rgba(72, 118, 107, 0.18) 55%,
+            rgba(72, 118, 107, 0.10) 82%,
+            transparent 100%),
+        /* L5 — low-freq aggregate splotch */
+        var(--noise-coarse),
+        /* L6 — fine concrete tooth */
+        var(--noise-fine),
+        /* L7 — directional concrete-pour band */
+        linear-gradient(168deg,
+            transparent 0%,
+            rgba(0, 0, 0, 0.08) 48%,
+            transparent 52%,
+            transparent 100%),
+        /* L8 — base vertical gradient */
+        linear-gradient(180deg,
+            var(--bg-elevated) 0%,
+            #1d231d 14%,
+            var(--bg-panel) 48%,
+            #14181c 78%,
+            var(--bg-deep) 100%);
     background-size:
         auto, auto, auto,
-        100% 100%, 100% 100%,
-        140px 140px, 100% 100%;
-    background-blend-mode: normal, normal, normal, normal, normal, overlay, normal;
-    border: 1px solid rgba(20, 24, 28, 0.7);
-    /* Inset bevel: top edge bright (caught light), bottom edge dark (shadow),
-       plus interior fog for the level color. */
+        6% 100%,
+        320px 320px,
+        140px 140px,
+        100% 100%,
+        100% 100%;
+    background-position:
+        0 0, 0 0, 0 0,
+        100% 0,
+        0 0,
+        0 0,
+        0 0,
+        0 0;
+    background-repeat:
+        no-repeat, no-repeat, no-repeat,
+        no-repeat,
+        repeat,
+        repeat,
+        no-repeat,
+        no-repeat;
+    background-blend-mode:
+        normal, normal, normal,
+        normal,
+        overlay,
+        overlay,
+        multiply,
+        normal;
+    border: 1px solid rgba(8, 12, 8, 0.85);
+    /* Two-stroke perimeter via box-shadow stack. No backdrop-filter
+       — chassis must read on Safari without blur. Interior fog is
+       heavier than v1 to compensate for olive flatness. */
     box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.10),
-        inset 0 -1px 0 rgba(0,0,0,0.7),
-        inset 1px 0 0 rgba(255,255,255,0.04),
-        inset -1px 0 0 rgba(0,0,0,0.5),
-        inset 0 0 28px rgba(0,0,0,0.55),
-        0 1px 0 rgba(255,255,255,0.03),
-        0 12px 28px rgba(0,0,0,0.55);
+        inset 0 1px 0  rgba(232, 228, 210, 0.10),
+        inset 0 2px 0  rgba(232, 228, 210, 0.04),
+        inset 1px 0 0  rgba(232, 228, 210, 0.05),
+        inset -1px 0 0 rgba(0, 0, 0, 0.55),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.75),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.30),
+        inset 0 0 36px rgba(0, 0, 0, 0.60),
+        0 1px 0 rgba(232, 228, 210, 0.03),
+        0 14px 32px rgba(0, 0, 0, 0.65);
     padding: var(--panel-pad);
     opacity: 0;
     transform: translateY(12px);
     animation: rise 0.6s ease both;
-    /* Slight back-blur so the sky bleeds in subtly */
-    backdrop-filter: blur(2px) saturate(0.92);
-    -webkit-backdrop-filter: blur(2px) saturate(0.92);
 }
 
-/* Extra wear: vertical water-streak + stamped serial. The plate noise is
-   already folded into .panel's background stack. */
-.panel::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-        /* faint vertical drip */
-        linear-gradient(90deg, transparent 0 22%, rgba(0,0,0,0.18) 22.5%, rgba(0,0,0,0.18) 23%, transparent 23.5%) no-repeat,
-        /* lighter scuff highlight along top */
-        linear-gradient(180deg, var(--al-scuff), transparent 18%);
-    background-blend-mode: multiply, normal;
-    mix-blend-mode: normal;
-    opacity: 0.55;
-}
-
-/* Rivets at panel corners — heavier bolt heads */
+/* Rebar line: single 1px horizontal at 30% from top of the panel,
+   pinned inside the padding zone. Replaces the dashed
+   .panel-header underline. */
 .panel::before {
     content: '';
     position: absolute;
-    inset: 5px;
+    left: var(--panel-pad);
+    right: var(--panel-pad);
+    top: 30%;
+    height: 1px;
+    background: var(--rebar);
+    opacity: 0.55;
     pointer-events: none;
-    background:
-        /* four corner bolts: dark head with bright rim */
-        radial-gradient(circle at 0 0,        #1d2127 0 2.2px, #4a545f 2.3px 2.9px, transparent 3px),
-        radial-gradient(circle at 100% 0,     #1d2127 0 2.2px, #4a545f 2.3px 2.9px, transparent 3px),
-        radial-gradient(circle at 0 100%,     #1d2127 0 2.2px, #4a545f 2.3px 2.9px, transparent 3px),
-        radial-gradient(circle at 100% 100%,  #1d2127 0 2.2px, #4a545f 2.3px 2.9px, transparent 3px),
-        /* tiny stress streak under top bolts */
-        radial-gradient(ellipse 6px 2px at 0 5px,    rgba(0,0,0,0.4), transparent 70%),
-        radial-gradient(ellipse 6px 2px at 100% 5px, rgba(0,0,0,0.4), transparent 70%);
-    background-repeat: no-repeat;
+}
+
+/* Two-stroke outer rule: 1px haze ring at 4px inset out from the
+   border, reads as the second of a double-stroke perimeter. */
+.panel::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border: 1px solid rgba(184, 187, 149, 0.14);
+    pointer-events: none;
+}
+
+/* Tiny copper inspection square — bottom-left of each panel.
+   Injected by app.js decoratePanels(). */
+.inspection-mark {
+    position: absolute;
+    left: 7px;
+    bottom: 7px;
+    width: 4px;
+    height: 4px;
+    background: var(--copper);
+    pointer-events: none;
+    z-index: 1;
 }
 
 .panel:nth-of-type(1) { animation-delay: 0.20s; }
@@ -637,22 +783,40 @@ body::after {
     gap: 10px;
     margin-bottom: 16px;
     padding-bottom: 12px;
-    border-bottom: 1px dashed var(--border-soft);
+    /* underline removed — rebar line at panel::before now divides */
     flex-wrap: wrap;
     position: relative;
     z-index: 1;
 }
 
+/* Stamped asset serial in the top-right of each panel header,
+   driven by data-serial="04-A|B|C" on the header element. */
+.panel-header[data-serial]::before {
+    content: "№ " attr(data-serial);
+    position: absolute;
+    top: -6px;
+    right: 2px;
+    font-family: var(--font-stencil);
+    font-weight: 400;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--copper);
+    background: var(--bg-trough);
+    padding: 1px 5px;
+    border: 1px solid rgba(125, 74, 37, 0.55);
+    pointer-events: none;
+}
+
 .panel-id {
     font-family: var(--font-stencil);
-    font-weight: 700;
+    font-weight: 400;
     font-size: 11px;
     letter-spacing: 1.5px;
-    color: var(--level-color);
+    color: var(--text-primary);
     padding: 2px 6px;
     border: 1px solid var(--level-color);
-    background: rgba(0,0,0,0.4);
-    transition: color 0.6s ease, border-color 0.6s ease;
+    background: rgba(var(--level-color-rgb), 0.08);
+    transition: border-color 0.6s ease, background 0.6s ease;
     flex: 0 0 auto;
 }
 
@@ -680,8 +844,8 @@ body::after {
 }
 
 .panel-status .dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--level-color);
     box-shadow: 0 0 6px var(--level-color);
@@ -778,10 +942,12 @@ body::after {
     margin-top: 14px;
     padding: 10px 18px;
     font-family: var(--font-stencil);
-    font-weight: 700;
+    font-weight: 400;
     font-size: 14px;
     letter-spacing: 5px;
-    color: var(--level-color);
+    /* Text always reads as the neutral primary — border + glow carry
+       the severity color. Reads as a stamped tag, not colored type. */
+    color: var(--text-primary);
     border: 2px solid var(--level-color);
     background: rgba(6, 8, 10, 0.95);
     box-shadow:
@@ -792,7 +958,7 @@ body::after {
     text-transform: uppercase;
     position: relative;
     z-index: 2;
-    transition: color 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease;
+    transition: border-color 0.6s ease, box-shadow 0.6s ease;
 }
 
 .meter-chip.all-clear { letter-spacing: 6px; }
@@ -832,7 +998,7 @@ body::after {
 .meter-axis-label--jc       { justify-content: flex-end; }
 
 .meter-axis-arrow {
-    color: var(--text-faint);
+    color: var(--text-dim);
     font-size: 10px;
 }
 
@@ -902,9 +1068,9 @@ body::after {
 .descriptor-frame::after  { border-left: 0;  border-top: 0; }
 
 .descriptor {
-    font-family: var(--font-stencil);
-    font-weight: 700;
-    font-size: clamp(24px, 8vw, 48px);
+    font-family: var(--font-stencil); /* Black Ops One — locked, never exceeds 40px */
+    font-weight: 400;                  /* Black Ops One is single-weight */
+    font-size: clamp(28px, 8.5vw, 40px);
     letter-spacing: 0.06em;
     line-height: 1.05;
     color: var(--level-color);
@@ -991,8 +1157,9 @@ body::after {
 
 .data-value strong {
     font-family: var(--font-stencil);
-    font-weight: 700;
-    color: var(--level-color);
+    font-weight: 400;
+    /* Deepened severity rail — small bold stencil text needs AA Normal. */
+    color: var(--level-color-text);
     letter-spacing: 2px;
     transition: color 0.6s ease;
 }
@@ -1096,8 +1263,8 @@ body::after {
 
 .refresh-status-dot {
     display: inline-block;
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: 50%;
     background: var(--level-color);
     box-shadow: 0 0 8px var(--level-color);
@@ -1211,10 +1378,10 @@ body::after {
 
 .input:focus {
     outline: none;
-    border-color: var(--level-color);
+    border-color: var(--focus-ring);
     box-shadow:
         inset 0 2px 6px rgba(0,0,0,0.55),
-        0 0 18px rgba(95, 181, 116, 0.18);
+        0 0 0 3px rgba(var(--level-color-rgb), 0.18);
 }
 
 .modal-hint {
@@ -1325,14 +1492,15 @@ body::after {
 
 .footer {
     margin-top: 22px;
-    padding: 16px 8px 8px;
-    border-top: 1px dashed var(--border-soft);
+    padding: 22px 8px 8px;
+    border-top: 1px dashed rgba(184, 187, 149, 0.18);
     text-align: center;
     opacity: 0;
     animation: fade 0.6s 0.85s ease both;
     position: relative;
 }
 
+/* Service-log placard centered over the dashed rule */
 .footer::before {
     content: 'SVC-LOG · DO NOT REMOVE';
     position: absolute;
@@ -1340,16 +1508,30 @@ body::after {
     left: 50%;
     transform: translateX(-50%);
     background: var(--bg-base);
-    padding: 0 8px;
+    padding: 0 10px;
     font-family: var(--font-body);
-    font-size: 8px;
+    font-weight: 500;
+    font-size: 9px;
     letter-spacing: 3px;
-    color: var(--rust);
+    color: var(--copper-deep);
+}
+
+/* Decommissioned-outpost microline pinned below the credits */
+.footer::after {
+    content: 'OUTPOST WX-04 · KAZAKH SSR · DECOMMISSIONED 1991';
+    display: block;
+    margin-top: 10px;
+    font-family: var(--font-body);
+    font-weight: 300;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
 }
 
 .footer-text {
     font-family: var(--font-stencil);
-    font-weight: 700;
+    font-weight: 400;
     font-size: 10px;
     letter-spacing: 3px;
     color: var(--text-dim);
@@ -1360,7 +1542,7 @@ body::after {
 .footer-credit {
     font-size: 10px;
     line-height: 1.5;
-    color: var(--text-faint);
+    color: var(--text-dim);
     margin-bottom: 3px;
     letter-spacing: 0.5px;
     overflow-wrap: anywhere;
@@ -1373,25 +1555,81 @@ body::after {
 .hidden { display: none !important; }
 
 /* ============================================================
-   Level color routing (preserved)
+   Level color routing.
+   IMPORTANT: when adding a level, set THREE vars in lock-step:
+     --level-color       (saturated, drives glows + borders + dots)
+     --level-color-text  (deepened, drives small text)
+     --level-color-rgb   (R,G,B triplet, drives rgba() plates)
    ============================================================ */
 
-[data-system="juicecon"][data-level="clear"] { --level-color: var(--jc-clear); }
-[data-system="juicecon"][data-level="5"]     { --level-color: var(--jc-5); }
-[data-system="juicecon"][data-level="4"]     { --level-color: var(--jc-4); }
-[data-system="juicecon"][data-level="3"]     { --level-color: var(--jc-3); }
-[data-system="juicecon"][data-level="2"]     { --level-color: var(--jc-2); }
-[data-system="juicecon"][data-level="1"]     { --level-color: var(--jc-1); }
+[data-system="juicecon"][data-level="clear"] {
+    --level-color: var(--jc-clear);
+    --level-color-text: var(--jc-clear-text);
+    --level-color-rgb: var(--jc-clear-rgb);
+}
+[data-system="juicecon"][data-level="5"] {
+    --level-color: var(--jc-5);
+    --level-color-text: var(--jc-5-text);
+    --level-color-rgb: var(--jc-5-rgb);
+}
+[data-system="juicecon"][data-level="4"] {
+    --level-color: var(--jc-4);
+    --level-color-text: var(--jc-4-text);
+    --level-color-rgb: var(--jc-4-rgb);
+}
+[data-system="juicecon"][data-level="3"] {
+    --level-color: var(--jc-3);
+    --level-color-text: var(--jc-3-text);
+    --level-color-rgb: var(--jc-3-rgb);
+}
+[data-system="juicecon"][data-level="2"] {
+    --level-color: var(--jc-2);
+    --level-color-text: var(--jc-2-text);
+    --level-color-rgb: var(--jc-2-rgb);
+}
+[data-system="juicecon"][data-level="1"] {
+    --level-color: var(--jc-1);
+    --level-color-text: var(--jc-1-text);
+    --level-color-rgb: var(--jc-1-rgb);
+}
 
-[data-system="ccf"][data-level="clear"] { --level-color: var(--ccf-clear); }
-[data-system="ccf"][data-level="1"]     { --level-color: var(--ccf-1); }
-[data-system="ccf"][data-level="2"]     { --level-color: var(--ccf-2); }
-[data-system="ccf"][data-level="3"]     { --level-color: var(--ccf-3); }
-[data-system="ccf"][data-level="4"]     { --level-color: var(--ccf-4); }
-[data-system="ccf"][data-level="5"]     { --level-color: var(--ccf-5); }
+[data-system="ccf"][data-level="clear"] {
+    --level-color: var(--ccf-clear);
+    --level-color-text: var(--ccf-clear-text);
+    --level-color-rgb: var(--ccf-clear-rgb);
+}
+[data-system="ccf"][data-level="1"] {
+    --level-color: var(--ccf-1);
+    --level-color-text: var(--ccf-1-text);
+    --level-color-rgb: var(--ccf-1-rgb);
+}
+[data-system="ccf"][data-level="2"] {
+    --level-color: var(--ccf-2);
+    --level-color-text: var(--ccf-2-text);
+    --level-color-rgb: var(--ccf-2-rgb);
+}
+[data-system="ccf"][data-level="3"] {
+    --level-color: var(--ccf-3);
+    --level-color-text: var(--ccf-3-text);
+    --level-color-rgb: var(--ccf-3-rgb);
+}
+[data-system="ccf"][data-level="4"] {
+    --level-color: var(--ccf-4);
+    --level-color-text: var(--ccf-4-text);
+    --level-color-rgb: var(--ccf-4-rgb);
+}
+[data-system="ccf"][data-level="5"] {
+    --level-color: var(--ccf-5);
+    --level-color-text: var(--ccf-5-text);
+    --level-color-rgb: var(--ccf-5-rgb);
+}
 
-[data-system="none"][data-level="clear"] { --level-color: var(--jc-clear); }
-[data-level="clear"] { --level-color: var(--jc-clear); }
+[data-system="none"][data-level="clear"],
+[data-level="clear"] {
+    --level-color: var(--jc-clear);
+    --level-color-text: var(--jc-clear-text);
+    --level-color-rgb: var(--jc-clear-rgb);
+}
 
 /* ============================================================
    Worst-level animations (preserved)
@@ -1418,10 +1656,12 @@ body::after {
 }
 
 @keyframes crackle {
+    /* Reduced amplitude (0.4px max) so the worst CCF state still has
+       visible electrical jitter without screen-reader cursor displacement. */
     0%   { text-shadow: 0 0 18px var(--level-color); transform: translate(0, 0); }
-    25%  { text-shadow: 0 0 26px var(--level-color), 2px -2px 0 #fff; transform: translate(1px, -1px); }
+    25%  { text-shadow: 0 0 26px var(--level-color), 1px -1px 0 rgba(255,255,255,0.6); transform: translate(0.4px, -0.2px); }
     50%  { text-shadow: 0 0 12px var(--level-color); transform: translate(0, 0); }
-    75%  { text-shadow: 0 0 30px var(--level-color), -1px 1px 0 #e0e7ff; transform: translate(-1px, 1px); }
+    75%  { text-shadow: 0 0 30px var(--level-color), -1px 1px 0 rgba(224,231,255,0.5); transform: translate(-0.3px, 0.3px); }
     100% { text-shadow: 0 0 18px var(--level-color); transform: translate(0, 0); }
 }
 
@@ -1607,14 +1847,15 @@ body[data-tod="night"][data-weather="fog"]    { --sky-top: #1a1b1e; --sky-bot: #
             transparent 60%);
     opacity: 0;
     transition: opacity 1.5s ease;
-    animation: sun-pulse 14s ease-in-out infinite;
+    animation: sun-pulse 30s ease-in-out infinite;
     will-change: transform;
 }
 body[data-tod="day"][data-weather="clear"]  .weather-sun { opacity: 0.95; }
 body[data-tod="day"][data-weather="partly"] .weather-sun { opacity: 0.55; }
 @keyframes sun-pulse {
+    /* Quiet ambient breath — 1.5% amplitude over 30s. Drops attention. */
     0%, 100% { transform: scale(1); }
-    50%      { transform: scale(1.06); }
+    50%      { transform: scale(1.015); }
 }
 
 /* ---------- Stars ---------- */
@@ -1835,4 +2076,37 @@ body {
         transition-duration: 0.01ms !important;
     }
     .meter-needle { transition: none; }
+
+    /* Status dots stop pulsing but stay fully visible (not fading to
+       opacity 0 partway through a clamped frame). */
+    .pulse-dot,
+    .panel-status .dot,
+    .refresh-status-dot {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    /* Carve-outs: instantaneous sky-color jumps are jarring when the
+       weather classifier swaps states. Allow a brief 200ms fade. */
+    .weather-sky-base {
+        transition: background 200ms ease !important;
+    }
+    .weather-sun,
+    .weather-stars,
+    .weather-cloud,
+    .weather-rain,
+    .weather-snow,
+    .weather-fog,
+    .weather-lightning {
+        animation: none !important;
+        transition: opacity 200ms ease !important;
+    }
+
+    /* Geiger sweep, crackle, band flicker all halt. */
+    .classification-stripes::after,
+    .descriptor,
+    .meter-chip,
+    .band-ccf-1 {
+        animation: none !important;
+    }
 }

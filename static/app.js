@@ -83,6 +83,7 @@
 
     // Initialize
     function init() {
+        decoratePanels();
         bindEvents();
         buildMeter();
         startTimecode();
@@ -90,6 +91,20 @@
             fetchTestDewpoint(testDewpoint);
         } else {
             getLocation();
+        }
+    }
+
+    // Add the small copper inspection square in the bottom-left of
+    // each panel. Pure decoration; safe to fail if .panel isn't in
+    // the DOM yet.
+    function decoratePanels() {
+        var panels = document.querySelectorAll('.panel');
+        for (var i = 0; i < panels.length; i++) {
+            if (panels[i].querySelector('.inspection-mark')) continue;
+            var mark = document.createElement('span');
+            mark.className = 'inspection-mark';
+            mark.setAttribute('aria-hidden', 'true');
+            panels[i].appendChild(mark);
         }
     }
 
@@ -626,7 +641,7 @@
     function submitZip() {
         var zip = zipInput.value.trim();
         if (!/^\d{5}$/.test(zip)) {
-            zipInput.style.borderColor = '#ef4444';
+            zipInput.style.borderColor = 'var(--oxblood-text)';
             return;
         }
 
