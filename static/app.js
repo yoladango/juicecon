@@ -6,8 +6,10 @@
     var errorEl = document.getElementById('error');
     var errorMessageEl = document.getElementById('error-message');
     var displayEl = document.getElementById('display');
-    var levelNumberEl = document.getElementById('level-number');
-    var levelPrefixEl = document.getElementById('level-prefix');
+    var meterChipEl = document.getElementById('meter-chip');
+    var meterReadoutValueEl = document.getElementById('meter-readout-value');
+    var meterNeedleEl = document.getElementById('meter-needle');
+    var meterBandsEl = document.getElementById('meter-bands');
     var descriptorEl = document.getElementById('descriptor');
     var descriptionEl = document.getElementById('description');
     var protocolEl = document.getElementById('protocol');
@@ -29,6 +31,8 @@
     var shareBtn = document.getElementById('share-btn');
     var refreshStatusEl = document.getElementById('refresh-status');
     var refreshStatusTextEl = document.getElementById('refresh-status-text');
+    var timecodeEl = document.getElementById('timecode');
+    var headerDateEl = document.getElementById('header-date');
 
     // State
     var currentLat = null;
@@ -48,6 +52,31 @@
         none: 'DEWCON'
     };
 
+    // Meter geometry — must match the SVG viewBox in index.html and CSS transform-origin in style.css
+    var METER = {
+        cx: 210,
+        cy: 200,
+        r: 160
+    };
+
+    // 11 equal-width segments. Ordered worst-dryness → comfort → worst-humidity (left to right).
+    // Each id corresponds to a CSS class (.band-<id>) and a [data-system][data-level] state.
+    var METER_SEGMENTS = [
+        { id: 'ccf-1',   system: 'ccf',      level: 1, numeral: '1' },
+        { id: 'ccf-2',   system: 'ccf',      level: 2, numeral: '2' },
+        { id: 'ccf-3',   system: 'ccf',      level: 3, numeral: '3' },
+        { id: 'ccf-4',   system: 'ccf',      level: 4, numeral: '4' },
+        { id: 'ccf-5',   system: 'ccf',      level: 5, numeral: '5' },
+        { id: 'comfort', system: 'none',     level: 'clear', numeral: '◆' },
+        { id: 'jc-5',    system: 'juicecon', level: 5, numeral: '5' },
+        { id: 'jc-4',    system: 'juicecon', level: 4, numeral: '4' },
+        { id: 'jc-3',    system: 'juicecon', level: 3, numeral: '3' },
+        { id: 'jc-2',    system: 'juicecon', level: 2, numeral: '2' },
+        { id: 'jc-1',    system: 'juicecon', level: 1, numeral: '1' }
+    ];
+
+    var SVG_NS = 'http://www.w3.org/2000/svg';
+
     // Check for test mode dewpoint override via URL param
     var urlParams = new URLSearchParams(window.location.search);
     var testDewpoint = urlParams.get('_dewpoint');
@@ -55,11 +84,120 @@
     // Initialize
     function init() {
         bindEvents();
+        buildMeter();
+        startTimecode();
         if (testDewpoint !== null) {
             fetchTestDewpoint(testDewpoint);
         } else {
             getLocation();
         }
+    }
+
+    // Live UTC timecode in classification bar + header date
+    function startTimecode() {
+        function pad(n) { return n < 10 ? '0' + n : '' + n; }
+        function tick() {
+            var d = new Date();
+            if (timecodeEl) {
+                timecodeEl.textContent =
+                    pad(d.getUTCHours()) + ':' +
+                    pad(d.getUTCMinutes()) + ':' +
+                    pad(d.getUTCSeconds()) + ' UTC';
+            }
+            if (headerDateEl) {
+                headerDateEl.textContent =
+                    d.getUTCFullYear() + '.' +
+                    pad(d.getUTCMonth() + 1) + '.' +
+                    pad(d.getUTCDate()) + 'Z';
+            }
+        }
+        tick();
+        setInterval(tick, 1000);
+    }
+
+    // =====================
+    // Meter (VU gauge)
+    // =====================
+
+    // Convert fractional position along the half-arc [0..1] to a point on a given radius
+    function pointOnArcT(t, radius) {
+        if (radius == null) radius = METER.r;
+        var angleRad = Math.PI * (1 - t);
+        return {
+            x: METER.cx + radius * Math.cos(angleRad),
+            y: METER.cy - radius * Math.sin(angleRad)
+        };
+    }
+
+    function arcPathT(t1, t2) {
+        var p1 = pointOnArcT(t1);
+        var p2 = pointOnArcT(t2);
+        return 'M ' + p1.x.toFixed(2) + ' ' + p1.y.toFixed(2) +
+               ' A ' + METER.r + ' ' + METER.r + ' 0 0 1 ' +
+               p2.x.toFixed(2) + ' ' + p2.y.toFixed(2);
+    }
+
+    function buildMeter() {
+        if (!meterBandsEl) return;
+
+        var n = METER_SEGMENTS.length;
+        // Segments touch — colors form a single ice→fire gradient
+        var gap = 0;
+
+        // Create a parallel <g> for the small in-segment numerals if not present
+        var numeralsEl = document.getElementById('meter-numerals');
+        if (!numeralsEl) {
+            numeralsEl = document.createElementNS(SVG_NS, 'g');
+            numeralsEl.setAttribute('id', 'meter-numerals');
+            numeralsEl.setAttribute('class', 'meter-numerals');
+            // insert before the needle so the needle renders on top
+            if (meterNeedleEl && meterNeedleEl.parentNode) {
+                meterNeedleEl.parentNode.insertBefore(numeralsEl, meterNeedleEl);
+            }
+        }
+
+        METER_SEGMENTS.forEach(function(seg, i) {
+            var t1 = (i / n) + gap;
+            var t2 = ((i + 1) / n) - gap;
+            var path = document.createElementNS(SVG_NS, 'path');
+            path.setAttribute('class', 'band band-' + seg.id);
+            path.setAttribute('d', arcPathT(t1, t2));
+            meterBandsEl.appendChild(path);
+
+            // Numeral inside the segment, on the arc
+            var tc = (i + 0.5) / n;
+            var pos = pointOnArcT(tc, METER.r);
+            var text = document.createElementNS(SVG_NS, 'text');
+            text.setAttribute('x', pos.x.toFixed(1));
+            text.setAttribute('y', pos.y.toFixed(1));
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dominant-baseline', 'middle');
+            text.textContent = seg.numeral;
+            numeralsEl.appendChild(text);
+        });
+    }
+
+    function levelToSegmentIndex(system, level, allClear) {
+        if (allClear || !system || system === 'none') return 5; // COMFORT (center)
+        var n = Number(level);
+        if (!isFinite(n)) return 5;
+        if (system === 'ccf') {
+            // CCF1..CCF5 → segments 0..4
+            return Math.max(0, Math.min(4, n - 1));
+        }
+        if (system === 'juicecon') {
+            // JC5..JC1 → segments 6..10
+            return Math.max(6, Math.min(10, 11 - n));
+        }
+        return 5;
+    }
+
+    function setNeedleToLevel(system, level, allClear) {
+        if (!meterNeedleEl) return;
+        var idx = levelToSegmentIndex(system, level, allClear);
+        var t = (idx + 0.5) / METER_SEGMENTS.length;
+        var deg = -90 + t * 180;
+        meterNeedleEl.style.transform = 'rotate(' + deg.toFixed(2) + 'deg)';
     }
 
     function bindEvents() {
@@ -294,6 +432,51 @@
             });
     }
 
+    // Map NWS textDescription + cloud cover + (fallback) temp/dewpoint to a
+    // discrete weather token used by the CSS background layers. Tokens:
+    //   clear | partly | cloudy | rain | storm | snow | fog
+    function classifyWeather(data) {
+        var cond = (data.condition || '').toLowerCase();
+        var w = null;
+
+        if (cond) {
+            if (/thunder|t-?storm|tstm|squall/.test(cond))           w = 'storm';
+            else if (/snow|sleet|flurr|ice pellet|wintry/.test(cond)) w = 'snow';
+            else if (/rain|drizzle|shower/.test(cond))                w = 'rain';
+            else if (/fog|mist|haze|smoke/.test(cond))                w = 'fog';
+            else if (/overcast/.test(cond))                           w = 'cloudy';
+            else if (/cloud/.test(cond)) {
+                w = /partly|few|mostly clear|scattered/.test(cond) ? 'partly' : 'cloudy';
+            } else if (/clear|fair|sunny/.test(cond))                 w = 'clear';
+        }
+
+        if (!w && typeof data.cloudCoverPct === 'number') {
+            var c = data.cloudCoverPct;
+            if (c <= 15)      w = 'clear';
+            else if (c <= 55) w = 'partly';
+            else if (c <= 85) w = 'cloudy';
+            else              w = 'cloudy';
+        }
+
+        if (!w) {
+            // Last-resort heuristic from temp + dewpoint
+            var t = data.temperature;
+            var d = data.dewpoint;
+            if (t != null && d != null) {
+                var spread = t - d;
+                if (t <= 32 && spread < 6)      w = 'snow';
+                else if (spread < 4)            w = 'fog';
+                else if (d >= 65 && spread < 8) w = 'cloudy';
+                else                            w = 'clear';
+            } else {
+                w = 'clear';
+            }
+        }
+
+        var tod = data.isDaytime === false ? 'night' : 'day';
+        return { weather: w, tod: tod };
+    }
+
     // Display
     function updateDisplay(data) {
         currentData = data;
@@ -304,28 +487,33 @@
         document.body.setAttribute('data-system', system);
         document.body.setAttribute('data-level', level);
 
-        // Update level number
+        // Set weather + time-of-day on body for sky background layers
+        var w = classifyWeather(data);
+        document.body.setAttribute('data-weather', w.weather);
+        document.body.setAttribute('data-tod', w.tod);
+
+        // Update meter chip (compact level callout below the needle pivot)
         if (data.allClear) {
-            levelNumberEl.textContent = 'ALL CLEAR';
-            levelNumberEl.classList.add('all-clear');
+            meterChipEl.textContent = 'ALL CLEAR';
+            meterChipEl.classList.add('all-clear');
         } else {
-            levelNumberEl.textContent = data.level;
-            levelNumberEl.classList.remove('all-clear');
+            var sysName = data.systemName || 'DEWCON';
+            meterChipEl.textContent = sysName + ' ' + data.level;
+            meterChipEl.classList.remove('all-clear');
         }
 
-        // Update system prefix label
-        if (data.allClear && system === 'none') {
-            levelPrefixEl.textContent = 'DEWCON';
-        } else {
-            levelPrefixEl.textContent = data.systemName || 'DEWCON';
-        }
+        // Drive the needle (categorical, points at active level) and the live dewpoint readout
+        meterReadoutValueEl.textContent = data.dewpoint.toFixed(1) + '°F';
+        setNeedleToLevel(system, data.level, data.allClear);
 
         // Update text
         descriptorEl.textContent = data.descriptor.toUpperCase();
         descriptionEl.textContent = '"' + data.description + '"';
 
         // Update data panel
-        protocolEl.textContent = systemNames[system] || 'DEWCON';
+        var protocolName = systemNames[system] || 'DEWCON';
+        protocolEl.innerHTML = '<strong></strong>';
+        protocolEl.firstChild.textContent = protocolName;
         temperatureEl.textContent = data.temperature != null ? data.temperature.toFixed(1) + '\u00B0F' : 'N/A';
         dewpointEl.textContent = data.dewpoint.toFixed(1) + '\u00B0F';
         locationEl.textContent = data.location.city + ', ' + data.location.state;

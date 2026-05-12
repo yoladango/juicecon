@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestCelsiusToFahrenheit(t *testing.T) {
@@ -351,3 +352,55 @@ func TestGetObservation_MalformedJSON(t *testing.T) {
 		t.Errorf("error should mention decode failure, got: %v", err)
 	}
 }
+
+func TestCloudLayersToPct(t *testing.T) {
+	tests := []struct {
+		name  string
+		codes []string
+		want  *int
+	}{
+		{"empty", []string{}, nil},
+		{"unknown only", []string{"???"}, nil},
+		{"clear", []string{"SKC"}, intPtr(0)},
+		{"few", []string{"FEW"}, intPtr(20)},
+		{"scattered", []string{"SCT"}, intPtr(45)},
+		{"broken", []string{"BKN"}, intPtr(75)},
+		{"overcast", []string{"OVC"}, intPtr(100)},
+		{"takes densest", []string{"FEW", "BKN", "SCT"}, intPtr(75)},
+		{"lowercase ok", []string{"ovc"}, intPtr(100)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := cloudLayersToPct(tt.codes)
+			switch {
+			case got == nil && tt.want == nil:
+				return
+			case got == nil || tt.want == nil:
+				t.Fatalf("got %v, want %v", got, tt.want)
+			case *got != *tt.want:
+				t.Errorf("got %d, want %d", *got, *tt.want)
+			}
+		})
+	}
+}
+
+func TestSolarElevationDay(t *testing.T) {
+	// June solstice noon in Chicago — sun should be high.
+	chicagoLat, chicagoLon := 41.88, -87.63
+	noonUTC := time.Date(2026, 6, 21, 18, 0, 0, 0, time.UTC) // ~1pm CDT
+	elev := solarElevationDeg(chicagoLat, chicagoLon, noonUTC)
+	if elev < 50 {
+		t.Errorf("expected high solar elevation at summer noon, got %.1f deg", elev)
+	}
+	if !isDaytime(chicagoLat, chicagoLon, noonUTC) {
+		t.Error("expected isDaytime=true at summer noon in Chicago")
+	}
+
+	// Same day, 3am local — should be deep night.
+	nightUTC := time.Date(2026, 6, 22, 8, 0, 0, 0, time.UTC) // 3am CDT
+	if isDaytime(chicagoLat, chicagoLon, nightUTC) {
+		t.Error("expected isDaytime=false at 3am local")
+	}
+}
+
+func intPtr(i int) *int { return &i }

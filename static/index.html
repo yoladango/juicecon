@@ -2,134 +2,250 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DEWCON - Atmospheric Moisture Assessment System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>DEWCON — Atmospheric Threat Command</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="manifest" href="/static/manifest.json">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#06080a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
-    <meta property="og:title" content="DEWCON - Atmospheric Moisture Assessment System">
+    <meta property="og:title" content="DEWCON — Atmospheric Threat Command">
     <meta property="og:description" content="Real-time dewpoint severity monitoring. Because humidity is a threat level.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://juicecon.fly.dev">
 </head>
-<body>
-    <div class="container">
-        <header class="header">
-            <div class="header-stripe"></div>
-            <div class="classification">ATMOSPHERIC MOISTURE ASSESSMENT SYSTEM</div>
-        </header>
-
-        <main class="main">
-            <div id="loading" class="loading">
-                <div class="loading-text">ACQUIRING TARGET COORDINATES...</div>
-                <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-            </div>
-
-            <div id="error" class="error hidden" role="alert" aria-live="assertive">
-                <div class="error-icon" aria-hidden="true">!</div>
-                <div class="error-title">SYSTEM ERROR</div>
-                <div id="error-message" class="error-message"></div>
-                <button id="retry-btn" class="btn">RETRY</button>
-            </div>
-
-            <div id="display" class="display hidden" aria-live="polite" role="status">
-                <div class="level-container">
-                    <div class="level-label">CURRENT THREAT LEVEL</div>
-                    <div id="level-number" class="level-number">3</div>
-                    <div id="level-prefix" class="level-prefix">JUICECON</div>
-                </div>
-
-                <div id="descriptor" class="descriptor">UNBEARABLE</div>
-                <div id="description" class="description">"The air has weight. You are breathing soup."</div>
-
-                <div class="data-panel">
-                    <div class="data-row">
-                        <span class="data-label">PROTOCOL <button id="info-btn" class="info-btn" aria-label="Protocol information">?</button></span>
-                        <span id="protocol" class="data-value">JUICECON</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">TEMPERATURE</span>
-                        <span id="temperature" class="data-value">--°F</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">DEWPOINT</span>
-                        <span id="dewpoint" class="data-value">--°F</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">LOCATION</span>
-                        <span id="location" class="data-value">Fort Wayne, IN</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">STATION</span>
-                        <span id="station" class="data-value">KFWA</span>
-                    </div>
-                    <div class="data-row">
-                        <span class="data-label">UPDATED</span>
-                        <span id="timestamp" class="data-value">--:-- --</span>
-                    </div>
-                </div>
-
-                <div class="actions">
-                    <button id="refresh-btn" class="btn">REFRESH DATA</button>
-                    <button id="share-btn" class="btn btn-secondary">SHARE</button>
-                    <button id="location-btn" class="btn btn-secondary">CHANGE LOCATION</button>
-                </div>
-
-                <div id="refresh-status" class="refresh-status" aria-live="polite">
-                    <span class="refresh-status-dot" aria-hidden="true"></span>
-                    <span id="refresh-status-text">AUTO-REFRESH ACTIVE</span>
-                </div>
-            </div>
-
-            <div id="location-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
-                <div class="modal-content">
-                    <div id="location-modal-title" class="modal-header">MANUAL LOCATION ENTRY</div>
-                    <div class="modal-body">
-                        <label for="zip-input" class="input-label">US ZIP CODE</label>
-                        <input type="text" id="zip-input" class="input" placeholder="45678" maxlength="5" pattern="[0-9]{5}">
-                        <div class="modal-hint">Enter 5-digit ZIP code for US locations</div>
-                    </div>
-                    <div class="modal-actions">
-                        <button id="modal-cancel" class="btn btn-secondary">CANCEL</button>
-                        <button id="modal-submit" class="btn">SUBMIT</button>
-                    </div>
-                </div>
-            </div>
-        </main>
-
-            <div id="info-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
-                <div class="modal-content info-modal-content">
-                    <div id="info-modal-title" class="modal-header">PROTOCOL INFORMATION</div>
-                    <div class="modal-body info-body">
-                        <div class="info-section">
-                            <div class="info-title">DEWCON</div>
-                            <div class="info-text">The unified Atmospheric Moisture Assessment System. DEWCON monitors dewpoint conditions and activates the appropriate sub-protocol based on current readings.</div>
-                        </div>
-                        <div class="info-section">
-                            <div class="info-title">JUICECON</div>
-                            <div class="info-text">Activates when dewpoint reaches 60°F or above. Monitors humidity severity on a descending scale (JC1 = worst). Designed by Joe Tritschler.</div>
-                        </div>
-                        <div class="info-section">
-                            <div class="info-title">CCF — CUNNINGHAM CRACKLE FACTOR</div>
-                            <div class="info-text">Activates when dewpoint drops to 25°F or below. Monitors dryness severity on a descending scale (CCF1 = worst). Tracks static shock risk, skin crackle potential, and general atmospheric desiccation. Designed by Joe Tritschler.</div>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button id="info-close" class="btn">DISMISS</button>
-                    </div>
-                </div>
-            </div>
-
-        <footer class="footer">
-            <div class="footer-text">DEWCON SYSTEM v2.0 // ATMOSPHERIC MOISTURE ASSESSMENT PROTOCOL</div>
-            <div class="footer-credit">Juicecon System created by Joe Tritschler</div>
-            <div class="footer-credit">Cunningham Crackle Factor created by Sheila Cunningham</div>
-            <div class="footer-credit">App designed and developed by Dan Branstrator and written mostly in Go</div>
-        </footer>
+<body data-system="none" data-level="clear" data-weather="clear" data-tod="day">
+    <!-- Live weather sky. Layered behind everything; CSS swaps active
+         layers based on body[data-weather] and body[data-tod]. -->
+    <div class="weather-sky" aria-hidden="true">
+        <div class="weather-sky-base"></div>
+        <div class="weather-sun"></div>
+        <div class="weather-stars"></div>
+        <div class="weather-cloud weather-cloud--1"></div>
+        <div class="weather-cloud weather-cloud--2"></div>
+        <div class="weather-cloud weather-cloud--3"></div>
+        <div class="weather-rain"></div>
+        <div class="weather-snow"></div>
+        <div class="weather-fog"></div>
+        <div class="weather-lightning"></div>
     </div>
+
+    <div class="grid-bg" aria-hidden="true"></div>
+    <div class="scanlines" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
+
+    <div class="frame">
+        <span class="reticle-tr" aria-hidden="true"></span>
+        <span class="reticle-bl" aria-hidden="true"></span>
+
+        <div class="classification-bar classification-bar--top" aria-hidden="true">
+            <div class="classification-stripes"></div>
+            <div class="classification-text">
+                <span>DEWCON</span>
+                <span class="sep">::</span>
+                <span class="pulse-dot"></span>
+                <span>LIVE TRANSMISSION</span>
+                <span class="sep">::</span>
+                <span class="timecode" id="timecode">--:--:-- UTC</span>
+            </div>
+            <div class="classification-stripes"></div>
+        </div>
+
+        <div class="container">
+            <header class="header">
+                <div class="header-meta">
+                    <span class="header-meta-block">
+                        <span class="header-meta-key">REPORT</span>
+                        <span class="header-meta-val">RT-LIVE / 060s</span>
+                    </span>
+                    <span class="header-meta-block">
+                        <span class="header-meta-key">DATE</span>
+                        <span class="header-meta-val" id="header-date">— — —</span>
+                    </span>
+                </div>
+                <h1 class="title">DEWCON</h1>
+                <div class="title-sub">Atmospheric Moisture Assessment System</div>
+                <div class="title-rule" aria-hidden="true"></div>
+            </header>
+
+            <main class="main">
+                <div id="loading" class="loading">
+                    <div class="loading-text">Acquiring target coordinates</div>
+                    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+                </div>
+
+                <div id="error" class="error hidden" role="alert" aria-live="assertive">
+                    <div class="error-icon" aria-hidden="true"><span>!</span></div>
+                    <div class="error-title">System Fault</div>
+                    <div id="error-message" class="error-message"></div>
+                    <button id="retry-btn" class="btn">Retry</button>
+                </div>
+
+                <div id="display" class="display hidden" aria-live="polite" role="status">
+
+                    <section class="panel panel--primary">
+                        <header class="panel-header">
+                            <span class="panel-id">// 01</span>
+                            <span class="panel-title">Dewpoint Severity</span>
+                            <span class="panel-status">
+                                <span class="dot"></span>
+                                <span>Live</span>
+                            </span>
+                        </header>
+                        <div class="meter-wrap">
+                            <svg id="meter" class="meter" viewBox="0 0 420 230" role="img" aria-labelledby="meter-title meter-desc">
+                                <title id="meter-title">Dewpoint severity gauge</title>
+                                <desc id="meter-desc">Eleven equal-width segments. Left half indicates CCF (dryness, worst at far left). Center is comfort. Right half indicates JuiceCon (humidity, worst at far right). Needle points to the active severity level. The numeric dewpoint reading is shown below the gauge.</desc>
+                                <g id="meter-bands" class="meter-bands"></g>
+                                <g id="meter-needle" class="meter-needle">
+                                    <line class="needle-line" x1="210" y1="200" x2="210" y2="60" />
+                                    <circle class="needle-hub" cx="210" cy="200" r="9" />
+                                </g>
+                            </svg>
+                            <div class="meter-axis" aria-hidden="true">
+                                <span class="meter-axis-label meter-axis-label--ccf">
+                                    <span class="meter-axis-arrow">◀</span>
+                                    <span>Dry · CCF</span>
+                                </span>
+                                <span class="meter-axis-label meter-axis-label--comfort"><span>Comfort Zone</span>
+                                </span>
+                                <span class="meter-axis-label meter-axis-label--jc">
+                                    <span>JuiceCon · Humid</span>
+                                    <span class="meter-axis-arrow">▶</span>
+                                </span>
+                            </div>
+                            <div id="meter-chip" class="meter-chip" aria-live="polite">DEWCON</div>
+                            <div class="meter-readout">
+                                <span class="meter-readout-label">Current Dewpoint</span>
+                                <span id="meter-readout-value" class="meter-readout-value">--°F</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="panel panel--assessment">
+                        <header class="panel-header">
+                            <span class="panel-id">// 02</span>
+                            <span class="panel-title">Operator Assessment</span>
+                        </header>
+                        <div class="assessment">
+                            <div class="descriptor-frame">
+                                <span id="descriptor" class="descriptor">STANDBY</span>
+                            </div>
+                            <div id="description" class="description">"Awaiting atmospheric data."</div>
+                        </div>
+                    </section>
+
+                    <section class="panel panel--telemetry">
+                        <header class="panel-header">
+                            <span class="panel-id">// 03</span>
+                            <span class="panel-title">Telemetry</span>
+                        </header>
+                        <div class="data-panel">
+                            <div class="data-row">
+                                <span class="data-label">Protocol <button id="info-btn" class="info-btn" aria-label="Protocol information">?</button></span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="protocol" class="data-value"><strong>DEWCON</strong></span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Temperature</span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="temperature" class="data-value">--°F</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Dewpoint</span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="dewpoint" class="data-value">--°F</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Location</span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="location" class="data-value">—</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Station</span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="station" class="data-value">—</span>
+                            </div>
+                            <div class="data-row">
+                                <span class="data-label">Updated</span>
+                                <span class="data-leader" aria-hidden="true"></span>
+                                <span id="timestamp" class="data-value">--:-- --</span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="actions">
+                        <button id="refresh-btn" class="btn">Refresh</button>
+                        <button id="share-btn" class="btn btn-secondary">Share</button>
+                        <button id="location-btn" class="btn btn-secondary">Relocate</button>
+                    </div>
+
+                    <div id="refresh-status" class="refresh-status" aria-live="polite">
+                        <span class="refresh-status-dot" aria-hidden="true"></span>
+                        <span id="refresh-status-text">Auto-refresh active</span>
+                    </div>
+                </div>
+
+                <div id="location-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="location-modal-title">
+                    <div class="modal-content">
+                        <div id="location-modal-title" class="modal-header">Manual Location Entry</div>
+                        <div class="modal-body">
+                            <label for="zip-input" class="input-label">US ZIP Code</label>
+                            <input type="text" id="zip-input" class="input" placeholder="45678" maxlength="5" pattern="[0-9]{5}">
+                            <div class="modal-hint">Enter 5-digit US ZIP</div>
+                        </div>
+                        <div class="modal-actions">
+                            <button id="modal-cancel" class="btn btn-secondary">Cancel</button>
+                            <button id="modal-submit" class="btn">Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="info-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="info-modal-title">
+                    <div class="modal-content info-modal-content">
+                        <div id="info-modal-title" class="modal-header">Protocol Information</div>
+                        <div class="modal-body info-body">
+                            <div class="info-section">
+                                <div class="info-title">DEWCON</div>
+                                <div class="info-text">The unified Atmospheric Moisture Assessment System. DEWCON monitors dewpoint conditions and activates the appropriate sub-protocol based on current readings.</div>
+                            </div>
+                            <div class="info-section">
+                                <div class="info-title">JUICECON</div>
+                                <div class="info-text">Activates when dewpoint reaches 60°F or above. Monitors humidity severity on a descending scale (JC1 = worst). Designed by Joe Tritschler.</div>
+                            </div>
+                            <div class="info-section">
+                                <div class="info-title">CCF — Cunningham Crackle Factor</div>
+                                <div class="info-text">Activates when dewpoint drops to 25°F or below. Monitors dryness severity on a descending scale (CCF1 = worst). Tracks static shock risk, skin crackle potential, and general atmospheric desiccation. Designed by Sheryl Cunningham.</div>
+                            </div>
+                        </div>
+                        <div class="modal-actions">
+                            <button id="info-close" class="btn">Dismiss</button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="footer">
+                <div class="footer-text">DEWCON v2.0 // Atmospheric Moisture Assessment Protocol</div>
+                <div class="footer-credit">Juicecon — Joe Tritschler · Cunningham Crackle Factor — Sheryl Cunningham</div>
+                <div class="footer-credit">Built by Dan Branstrator · mostly Go, occasionally JavaScript</div>
+            </footer>
+        </div>
+
+        <div class="classification-bar classification-bar--bottom" aria-hidden="true">
+            <div class="classification-stripes"></div>
+            <div class="classification-text">
+                <span>END TRANSMISSION</span>
+                <span class="sep">::</span>
+                <span>ATMOSPHERIC ADVISORY</span>
+            </div>
+            <div class="classification-stripes"></div>
+        </div>
+    </div>
+
     <script src="/static/app.js"></script>
 </body>
 </html>

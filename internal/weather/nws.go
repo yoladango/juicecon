@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -124,15 +126,41 @@ func (c *Client) GetObservation(ctx context.Context, lat, lon float64) (*Observa
 	}
 
 	timestamp, _ := time.Parse(time.RFC3339, obs.Properties.Timestamp)
+	// Fall back to "now" when NWS omits the timestamp, so day/night detection
+	// still has something reasonable to work with.
+	if timestamp.IsZero() {
+		timestamp = time.Now().UTC()
+	}
+
+	// Wind speed: NWS reports in km/h ("wmoUnit:km_h-1") or sometimes m/s.
+	var windKmh *float64
+	if obs.Properties.WindSpeed.Value != nil {
+		v := *obs.Properties.WindSpeed.Value
+		if strings.Contains(obs.Properties.WindSpeed.UnitCode, "m_s") {
+			v = v * 3.6
+		}
+		windKmh = &v
+	}
+
+	// Cloud cover: take the densest reported layer. NWS uses METAR codes.
+	cloudCodes := make([]string, 0, len(obs.Properties.CloudLayers))
+	for _, l := range obs.Properties.CloudLayers {
+		cloudCodes = append(cloudCodes, l.Amount)
+	}
+	cloudPct := cloudLayersToPct(cloudCodes)
 
 	result := &Observation{
-		DewpointC:    dewpointC,
-		DewpointF:    dewpointF,
-		TemperatureF: temperatureF,
-		Timestamp:    timestamp,
-		Station:      stationID,
-		City:         points.Properties.RelativeLocation.Properties.City,
-		State:        points.Properties.RelativeLocation.Properties.State,
+		DewpointC:     dewpointC,
+		DewpointF:     dewpointF,
+		TemperatureF:  temperatureF,
+		Timestamp:     timestamp,
+		Station:       stationID,
+		City:          points.Properties.RelativeLocation.Properties.City,
+		State:         points.Properties.RelativeLocation.Properties.State,
+		Condition:     strings.TrimSpace(obs.Properties.TextDescription),
+		CloudCoverPct: cloudPct,
+		WindSpeedKmh:  windKmh,
+		IsDaytime:     isDaytime(lat, lon, timestamp),
 	}
 
 	c.cache.set(key, result)
@@ -163,4 +191,91 @@ func (c *Client) makeRequest(ctx context.Context, url string) (*http.Response, e
 
 func celsiusToFahrenheit(c float64) float64 {
 	return (c * 9 / 5) + 32
+}
+
+// cloudLayersToPct returns the densest cloud cover percentage represented
+// by the slice of METAR cloud-amount codes ("SKC", "CLR", "FEW", "SCT",
+// "BKN", "OVC", "VV"). Unknown codes are ignored. nil is returned when
+// no useful information is present.
+func cloudLayersToPct(codes []string) *int {
+	if len(codes) == 0 {
+		return nil
+	}
+	best := -1
+	for _, raw := range codes {
+		c := strings.ToUpper(strings.TrimSpace(raw))
+		var pct int
+		switch c {
+		case "SKC", "CLR", "NCD", "NSC":
+			pct = 0
+		case "FEW":
+			pct = 20
+		case "SCT":
+			pct = 45
+		case "BKN":
+			pct = 75
+		case "OVC", "VV":
+			pct = 100
+		default:
+			continue
+		}
+		if pct > best {
+			best = pct
+		}
+	}
+	if best < 0 {
+		return nil
+	}
+	return &best
+}
+
+// isDaytime returns true when the sun is above the horizon at the given
+// latitude/longitude and instant (UTC). Uses a NOAA-derived solar
+// position approximation accurate to within a couple of minutes — more
+// than enough to switch a day/night background.
+func isDaytime(lat, lon float64, t time.Time) bool {
+	return solarElevationDeg(lat, lon, t) > 0
+}
+
+func solarElevationDeg(lat, lon float64, t time.Time) float64 {
+	tUTC := t.UTC()
+	doy := float64(tUTC.YearDay())
+	utcHours := float64(tUTC.Hour()) + float64(tUTC.Minute())/60 + float64(tUTC.Second())/3600
+
+	// Fractional year (radians)
+	y := 2 * math.Pi / 365 * (doy - 1 + (utcHours-12)/24)
+
+	// Equation of time (minutes)
+	eot := 229.18 * (0.000075 +
+		0.001868*math.Cos(y) -
+		0.032077*math.Sin(y) -
+		0.014615*math.Cos(2*y) -
+		0.040849*math.Sin(2*y))
+
+	// Solar declination (radians)
+	decl := 0.006918 -
+		0.399912*math.Cos(y) +
+		0.070257*math.Sin(y) -
+		0.006758*math.Cos(2*y) +
+		0.000907*math.Sin(2*y) -
+		0.002697*math.Cos(3*y) +
+		0.00148*math.Sin(3*y)
+
+	// True solar time (minutes)
+	tst := utcHours*60 + eot + 4*lon
+
+	// Hour angle (radians); 720 min = solar noon
+	ha := (tst/4 - 180) * math.Pi / 180
+
+	latRad := lat * math.Pi / 180
+
+	sinElev := math.Sin(latRad)*math.Sin(decl) +
+		math.Cos(latRad)*math.Cos(decl)*math.Cos(ha)
+	// Clamp for safety
+	if sinElev > 1 {
+		sinElev = 1
+	} else if sinElev < -1 {
+		sinElev = -1
+	}
+	return math.Asin(sinElev) * 180 / math.Pi
 }

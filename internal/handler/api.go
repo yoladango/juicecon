@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"time"
@@ -20,17 +21,21 @@ var zipRegex = regexp.MustCompile(`^\d{5}$`)
 
 // Response represents the unified API response
 type Response struct {
-	ActiveSystem string   `json:"activeSystem"`
-	SystemName   string   `json:"systemName"`
-	Level        *int     `json:"level"`
-	LevelDisplay string   `json:"levelDisplay"`
-	Dewpoint     float64  `json:"dewpoint"`
-	Temperature  *float64 `json:"temperature"`
-	Descriptor   string   `json:"descriptor"`
-	Description  string   `json:"description"`
-	Location     Location `json:"location"`
-	Timestamp    string   `json:"timestamp"`
-	AllClear     bool     `json:"allClear"`
+	ActiveSystem  string   `json:"activeSystem"`
+	SystemName    string   `json:"systemName"`
+	Level         *int     `json:"level"`
+	LevelDisplay  string   `json:"levelDisplay"`
+	Dewpoint      float64  `json:"dewpoint"`
+	Temperature   *float64 `json:"temperature"`
+	Descriptor    string   `json:"descriptor"`
+	Description   string   `json:"description"`
+	Location      Location `json:"location"`
+	Timestamp     string   `json:"timestamp"`
+	AllClear      bool     `json:"allClear"`
+	Condition     string   `json:"condition,omitempty"`
+	CloudCoverPct *int     `json:"cloudCoverPct,omitempty"`
+	WindSpeedKmh  *float64 `json:"windSpeedKmh,omitempty"`
+	IsDaytime     bool     `json:"isDaytime"`
 }
 
 // Location represents location information
@@ -93,7 +98,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			h.writeError(w, http.StatusBadRequest, "Invalid dewpoint value", "INVALID_PARAMS")
 			return
 		}
-		h.writeTestResponse(w, dp)
+		h.writeTestResponse(w, dp, r.URL.Query())
 		return
 	}
 
@@ -130,18 +135,32 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			State:   obs.State,
 			Station: obs.Station,
 		},
-		Timestamp: obs.Timestamp.Format("2006-01-02T15:04:05Z"),
-		AllClear:  result.AllClear,
+		Timestamp:     obs.Timestamp.Format("2006-01-02T15:04:05Z"),
+		AllClear:      result.AllClear,
+		Condition:     obs.Condition,
+		CloudCoverPct: obs.CloudCoverPct,
+		WindSpeedKmh:  obs.WindSpeedKmh,
+		IsDaytime:     obs.IsDaytime,
 	}
 
 	h.writeJSON(w, http.StatusOK, resp)
 }
 
-// writeTestResponse builds a response from a simulated dewpoint value
-func (h *Handler) writeTestResponse(w http.ResponseWriter, dewpointF float64) {
+// writeTestResponse builds a response from a simulated dewpoint value.
+// Test mode supports two optional query params for UI development:
+//
+//	?condition=...   override the textDescription (e.g. "Snow", "Rain")
+//	?night=1         force IsDaytime to false
+func (h *Handler) writeTestResponse(w http.ResponseWriter, dewpointF float64, q url.Values) {
 	result := index.Evaluate(dewpointF)
 	// Simulate a temperature roughly 10 degrees above the dewpoint
 	tempF := math.Round((dewpointF+10)*10) / 10
+
+	cond := q.Get("condition")
+	day := true
+	if v := q.Get("night"); v != "" && v != "0" {
+		day = false
+	}
 
 	resp := Response{
 		ActiveSystem: string(result.ActiveSystem),
@@ -159,6 +178,8 @@ func (h *Handler) writeTestResponse(w http.ResponseWriter, dewpointF float64) {
 		},
 		Timestamp: time.Now().UTC().Format("2006-01-02T15:04:05Z"),
 		AllClear:  result.AllClear,
+		Condition: cond,
+		IsDaytime: day,
 	}
 
 	h.writeJSON(w, http.StatusOK, resp)
